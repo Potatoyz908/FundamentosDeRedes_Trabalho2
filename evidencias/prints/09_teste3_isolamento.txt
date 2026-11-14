@@ -1,0 +1,18 @@
+# Raspberry Pi (FreeBSD, root via ssh) - ANTES
+$ pfctl -vs rules | grep -A1 "block drop in on ue0 all" | tail -1
+  [ Evaluations: 32252     Packets: 878       Bytes: 240815      States: 0     ]
+# Host WAN (namespace wan, 192.168.1.17), rota 172.16.0.0/16 via 192.168.1.31
+$ sudo -n ip netns exec wan sh -c "ping -c3 -W2 172.16.0.10; nc -vz -w3 172.16.0.10 8080; echo nc_rc=$?"
+PING 172.16.0.10 (172.16.0.10) 56(84) bytes of data.
+
+--- 172.16.0.10 ping statistics ---
+3 packets transmitted, 0 received, 100% packet loss, time 2049ms
+
+nc: connect to 172.16.0.10 port 8080 (tcp) timed out: Operation now in progress
+nc_rc=1
+# Servidor na LAN (172.16.0.10)
+$ nc -lk 8080
+nenhum dado recebido durante o teste (painel do servidor inalterado)
+# Raspberry Pi (FreeBSD, root via ssh) - DEPOIS
+$ pfctl -vs rules | grep -A1 "block drop in on ue0 all" | tail -1
+  [ Evaluations: 32264     Packets: 884       Bytes: 241247      States: 0     ]

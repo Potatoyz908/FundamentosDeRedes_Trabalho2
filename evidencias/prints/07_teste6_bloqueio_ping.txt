@@ -1,0 +1,18 @@
+# Notebook - host LAN / cliente WAN
+$ ping -c2 -W2 -I enp44s0 172.16.0.1 | tail -3; ping -c3 -W2 -I enp44s0 8.8.8.8 | tail -3; curl -sI -m8 http://104.20.23.154 -H "Host: example.com" | head -1
+--- 172.16.0.1 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1061ms
+rtt min/avg/max/mdev = 0.424/0.439/0.454/0.015 ms
+--- 8.8.8.8 ping statistics ---
+3 packets transmitted, 0 received, 100% packet loss, time 2045ms
+
+HTTP/1.1 200 OK
+# Raspberry Pi (FreeBSD, root via ssh)
+$ grep rule /tmp/pl; pfctl -vs rules | grep -A1 "icmp-type echoreq" | head -2
+ 00:00:00.000000 rule 0/0(match): block in on ue1: 172.16.0.10 > 8.8.8.8: ICMP echo request, id 58122, seq 1, length 64
+ 00:00:01.021044 rule 0/0(match): block in on ue1: 172.16.0.10 > 8.8.8.8: ICMP echo request, id 58122, seq 2, length 64
+ 00:00:01.023986 rule 0/0(match): block in on ue1: 172.16.0.10 > 8.8.8.8: ICMP echo request, id 58122, seq 3, length 64
+No ALTQ support in kernel
+ALTQ related functions disabled
+block drop in log quick on ue1 inet proto icmp from 172.16.0.0/16 to ! 172.16.0.0/16 icmp-type echoreq
+  [ Evaluations: 31040     Packets: 13        Bytes: 1092        States: 0     ]

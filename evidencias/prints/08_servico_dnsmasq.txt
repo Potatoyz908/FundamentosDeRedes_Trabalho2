@@ -1,0 +1,12 @@
+# Raspberry Pi (FreeBSD, root via ssh)
+$ service dnsmasq status; service dnsmasq stop; sockstat -4l | grep -c ":67 "; service dnsmasq status; service dnsmasq start; service dnsmasq status; sockstat -4l | grep ":67 "
+dnsmasq is running as pid 2995.
+Performing sanity check on dnsmasq configuration.
+dnsmasq: syntax check OK.
+Stopping dnsmasq.
+Waiting for PIDS: 2995.
+0
+dnsmasq is not running.
+Starting dnsmasq.
+dnsmasq is running as pid 3787.
+nobody dnsmasq    3787  4 udp4  *:67                  *:*

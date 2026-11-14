@@ -1,0 +1,14 @@
+# Raspberry Pi (FreeBSD, root via ssh)
+$ pfctl -sn; pfctl -sr
+nat on ue0 inet from 172.16.0.0/16 to any -> (ue0) round-robin
+rdr on ue0 inet proto tcp from any to (ue0) port = http tag DNAT_TESTE -> 172.16.0.10 port 8080
+scrub in all fragment reassemble
+block drop in log quick on ue1 inet proto icmp from 172.16.0.0/16 to ! 172.16.0.0/16 icmp-type echoreq
+pass in on ue1 all flags S/SA keep state
+pass out on ue1 all flags S/SA keep state
+block drop in on ue0 all
+pass in on ue0 inet proto tcp from any to (ue0) port = ssh flags S/SA keep state
+pass in on ue0 inet proto tcp all flags S/SA keep state tagged DNAT_TESTE
+pass in on ue0 inet proto udp from any port = bootps to any port = bootpc keep state
+pass in on ue0 inet proto icmp from any to (ue0) icmp-type echoreq keep state
+pass out on ue0 all flags S/SA keep state

@@ -1,0 +1,20 @@
+# Raspberry Pi (FreeBSD, root via ssh)
+$ ifconfig ue0 | grep -E "^ue0|inet |status"; ifconfig ue1 | grep -E "^ue1|inet |status"; sysctl net.inet.ip.forwarding; netstat -rn -f inet | head -8; service pf status | head -1; service pflog status; service dnsmasq status
+ue0: flags=1008843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST,LOWER_UP> metric 0 mtu 1500
+        inet 192.168.1.31 netmask 0xffffff00 broadcast 192.168.1.255
+        status: active
+ue1: flags=1008843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST,LOWER_UP> metric 0 mtu 1500
+        inet 172.16.0.1 netmask 0xffff0000 broadcast 172.16.255.255
+        status: active
+net.inet.ip.forwarding: 1
+Routing tables
+
+Internet:
+Destination        Gateway            Flags         Netif Expire
+default            192.168.1.254      UGS             ue0
+127.0.0.1          link#1             UH              lo0
+172.16.0.0/16      link#3             U               ue1
+172.16.0.1         link#1             UHS             lo0
+Status: Enabled for 0 days 01:22:36           Debug: Urgent
+pflog is running as pid 1654.
+dnsmasq is running as pid 2995.

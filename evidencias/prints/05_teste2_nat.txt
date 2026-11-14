@@ -1,0 +1,15 @@
+# Raspberry Pi (FreeBSD, root via ssh)
+$ echo "== LAN (ue1)"; grep IP /tmp/n1; echo "== WAN (ue0)"; grep IP /tmp/n0; echo "== estado"; pfctl -ss | grep "104.20.23.154:80" | tail -2
+== LAN (ue1)
+16:23:47.733094 IP 172.16.0.10.34040 > 104.20.23.154.80: Flags [S], seq 1378516670, win 64240, options [mss 1460,sackOK,TS val 3617334572 ecr 0,nop,wscale 10], length 0
+16:23:47.754395 IP 104.20.23.154.80 > 172.16.0.10.34040: Flags [S.], seq 1640755493, ack 1378516671, win 65535, options [mss 1400,sackOK,TS val 2512155803 ecr 3617334572,nop,wscale 13], length 0
+16:23:47.754837 IP 172.16.0.10.34040 > 104.20.23.154.80: Flags [.], ack 1, win 63, options [nop,nop,TS val 3617334594 ecr 2512155803], length 0
+16:23:47.754868 IP 172.16.0.10.34040 > 104.20.23.154.80: Flags [P.], seq 1:76, ack 1, win 63, options [nop,nop,TS val 3617334594 ecr 2512155803], length 75: HTTP: GET / HTTP/1.1
+== WAN (ue0)
+16:23:47.733243 IP 192.168.1.31.56076 > 104.20.23.154.80: Flags [S], seq 1378516670, win 64240, options [mss 1460,sackOK,TS val 3617334572 ecr 0,nop,wscale 10], length 0
+16:23:47.754334 IP 104.20.23.154.80 > 192.168.1.31.56076: Flags [S.], seq 1640755493, ack 1378516671, win 65535, options [mss 1400,sackOK,TS val 2512155803 ecr 3617334572,nop,wscale 13], length 0
+16:23:47.754897 IP 192.168.1.31.56076 > 104.20.23.154.80: Flags [.], ack 1, win 63, options [nop,nop,TS val 3617334594 ecr 2512155803], length 0
+16:23:47.754904 IP 192.168.1.31.56076 > 104.20.23.154.80: Flags [P.], seq 1:76, ack 1, win 63, options [nop,nop,TS val 3617334594 ecr 2512155803], length 75: HTTP: GET / HTTP/1.1
+== estado
+all tcp 104.20.23.154:80 <- 172.16.0.10:34040       FIN_WAIT_2:FIN_WAIT_2
+all tcp 192.168.1.31:56076 (172.16.0.10:34040) -> 104.20.23.154:80       FIN_WAIT_2:FIN_WAIT_2

@@ -1,0 +1,15 @@
+# Host WAN (namespace wan, 192.168.1.17) - digitou "ola da WAN"
+$ telnet 192.168.1.31 80
+Trying 192.168.1.31...
+Connected to 192.168.1.31.
+Escape character is '^]'.
+ola da WAN
+ola da LAN
+# Servidor na LAN (172.16.0.10) - digitou "ola da LAN"
+$ nc -lk 8080
+ola da WAN
+ola da LAN
+# Raspberry Pi (FreeBSD, root via ssh) - durante a conexao
+$ pfctl -ss | grep 8080
+all tcp 172.16.0.10:8080 (192.168.1.31:80) <- 192.168.1.17:33054       ESTABLISHED:ESTABLISHED
+all tcp 192.168.1.17:33054 -> 172.16.0.10:8080       ESTABLISHED:ESTABLISHED

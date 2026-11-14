@@ -1,0 +1,7 @@
+# Raspberry Pi (FreeBSD, root via ssh)
+$ pfctl -nf /etc/pf.conf && echo PF_OK; dnsmasq --test -C /usr/local/etc/dnsmasq.conf; sh -n /etc/rc.conf && echo RC_OK; freebsd-version; dnsmasq --version | head -1
+PF_OK
+dnsmasq: syntax check OK.
+RC_OK
+15.1-RELEASE
+Dnsmasq version 2.93  Copyright (c) 2000-2026 Simon Kelley
