@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 330" font-family="sans-serif" font-size="13">
+<defs><marker id="a" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#333"/></marker></defs>
+<rect width="780" height="330" fill="#ffffff"/>
+<text x="390" y="22" text-anchor="middle" font-weight="bold" font-size="15">O que o pf reescreve em cada sentido</text>
+<rect x="30" y="50" width="130" height="50" rx="6" fill="#e9f7ec" stroke="#2e8b4a"/><text x="95" y="80" text-anchor="middle">Host LAN</text>
+<rect x="325" y="50" width="130" height="50" rx="6" fill="#fff4e0" stroke="#c77a00"/><text x="390" y="80" text-anchor="middle">Pi (pf)</text>
+<rect x="620" y="50" width="130" height="50" rx="6" fill="#e8f1fb" stroke="#2f6db5"/><text x="685" y="80" text-anchor="middle">Internet / WAN</text>
+<text x="20" y="135" font-weight="bold">NAT (saída): a origem é trocada</text>
+<line x1="160" y1="160" x2="325" y2="160" stroke="#333" marker-end="url(#a)"/>
+<text x="242" y="152" text-anchor="middle">172.16.0.10:34040 → destino:80</text>
+<line x1="455" y1="160" x2="620" y2="160" stroke="#333" marker-end="url(#a)"/>
+<text x="537" y="152" text-anchor="middle">192.168.1.31:56076 → destino:80</text>
+<text x="390" y="185" text-anchor="middle" fill="#555" font-size="12">regra: nat on ue0 from 172.16.0.0/16 to any -&gt; (ue0)</text>
+<text x="20" y="225" font-weight="bold">DNAT (entrada): o destino é trocado</text>
+<line x1="620" y1="250" x2="455" y2="250" stroke="#333" marker-end="url(#a)"/>
+<text x="537" y="242" text-anchor="middle">WAN → 192.168.1.31:80</text>
+<line x1="325" y1="250" x2="160" y2="250" stroke="#333" marker-end="url(#a)"/>
+<text x="242" y="242" text-anchor="middle">WAN → 172.16.0.10:8080</text>
+<text x="390" y="275" text-anchor="middle" fill="#555" font-size="12">regra: rdr on ue0 proto tcp to (ue0) port 80 tag DNAT_TESTE -&gt; 172.16.0.10 port 8080</text>
+<text x="390" y="300" text-anchor="middle" fill="#555" font-size="12">filtro: pass in on ue0 proto tcp tagged DNAT_TESTE (só o que o rdr marcou entra na LAN)</text>
+</svg>
