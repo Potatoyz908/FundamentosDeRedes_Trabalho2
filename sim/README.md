@@ -12,7 +12,8 @@ python -m http.server 8765
 ```
 
 2. Acesse `http://localhost:8765`
-3. Digite `demo` para o roteiro, ou use os botões **pi / lan / wan**.
+3. No painel **Guia** à direita: leia *Por que rodar* → **Executar** (ou **Preencher** + Enter) → confira *O que observar*.
+4. Versão em Markdown (também no Pages): [`GUIA.md`](GUIA.md).
 
 > Módulos ES (`type="module"`) exigem HTTP em alguns navegadores — prefira o `http.server` acima em vez de `file://` se algo não carregar.
 

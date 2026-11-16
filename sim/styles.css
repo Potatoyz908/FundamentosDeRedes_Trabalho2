@@ -96,17 +96,132 @@ h1 {
   color: var(--accent);
 }
 
-.term-wrap {
+.hint strong { color: var(--text); font-weight: 600; }
+
+.layout {
   flex: 1;
+  display: grid;
+  grid-template-columns: 1fr minmax(280px, 380px);
+  gap: 0.75rem;
+  min-height: 0;
+  padding: 0.75rem 1rem 1rem;
+}
+
+.term-wrap {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  margin: 0.75rem 1rem 1rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: #0a0e13;
   overflow: hidden;
 }
+
+.guide {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.guide-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.guide h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.guide-badge {
+  display: inline-block;
+  margin: 0;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  width: fit-content;
+}
+
+.guide-badge[data-ctx="pi"] { background: #1a3d28; color: var(--pi); }
+.guide-badge[data-ctx="lan"] { background: #16324d; color: var(--lan); }
+.guide-badge[data-ctx="wan"] { background: #3d2a14; color: var(--wan); }
+
+.guide-cmd {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 6px;
+  background: #0a0e13;
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--accent);
+}
+
+.guide-block h3 {
+  margin: 0 0 0.25rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.guide-block p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.guide-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.guide-actions button {
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #0a0e13;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.guide-actions button:hover { border-color: var(--accent); }
+.guide-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+.guide-actions button.primary {
+  background: var(--accent);
+  color: #0a0e13;
+  border-color: var(--accent);
+  font-weight: 600;
+  grid-column: 1 / -1;
+}
+
+.guide-foot {
+  margin: 0.25rem 0 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.guide-foot a { color: var(--accent); }
 
 .output {
   flex: 1;
@@ -152,7 +267,15 @@ body[data-ctx="pi"] #prompt { color: var(--pi); }
   font-size: 0.86rem;
 }
 
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(280px, 1fr) auto;
+  }
+  .guide { max-height: 42vh; }
+}
+
 @media (max-width: 640px) {
   .top { padding: 0.85rem 1rem; }
-  .term-wrap { margin: 0.5rem; }
+  .layout { padding: 0.5rem; }
 }

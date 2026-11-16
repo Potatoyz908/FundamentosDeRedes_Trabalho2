@@ -1,5 +1,6 @@
 import { setCtx } from "./state.js";
 import { dispatch, getPrompt, getCtx } from "./commands.js";
+import { STEPS } from "./guide.js";
 
 const output = document.getElementById("output");
 const form = document.getElementById("cmd-form");
@@ -7,8 +8,21 @@ const input = document.getElementById("cmd-input");
 const promptEl = document.getElementById("prompt");
 const buttons = document.querySelectorAll(".ctx-btns button");
 
+const elStage = document.getElementById("guide-stage");
+const elProgress = document.getElementById("guide-progress");
+const elTitle = document.getElementById("guide-title");
+const elCtx = document.getElementById("guide-ctx");
+const elCmd = document.getElementById("guide-cmd");
+const elWhy = document.getElementById("guide-why");
+const elLook = document.getElementById("guide-look");
+const btnPrev = document.getElementById("guide-prev");
+const btnNext = document.getElementById("guide-next");
+const btnFill = document.getElementById("guide-fill");
+const btnRun = document.getElementById("guide-run");
+
 const history = [];
 let histIdx = -1;
+let stepIdx = 0;
 
 function syncUi() {
   const ctx = getCtx();
@@ -27,34 +41,28 @@ function append(cls, text) {
   output.scrollTop = output.scrollHeight;
 }
 
-function welcome() {
-  append(
-    "line-meta",
-    `Simulador interativo do Trabalho 2 — Fundamentos de Redes
-Contextos: pi (FreeBSD) · lan (172.16.0.10) · wan (192.168.1.17)
-IPs das evidências: WAN Pi 192.168.1.31 · gateway 192.168.1.254
-
-Digite demo para o roteiro completo, ou comece com:
-  ifconfig ue0 ; ifconfig ue1`
-  );
-  syncUi();
+function renderGuide() {
+  const s = STEPS[stepIdx];
+  elStage.textContent = s.stage;
+  elProgress.textContent = `${stepIdx + 1} / ${STEPS.length}`;
+  elTitle.textContent = s.title;
+  elCtx.textContent = `contexto: ${s.ctx}`;
+  elCtx.dataset.ctx = s.ctx;
+  elCmd.textContent = s.cmd;
+  elWhy.textContent = s.why;
+  elLook.textContent = s.look;
+  btnPrev.disabled = stepIdx === 0;
+  btnNext.disabled = stepIdx === STEPS.length - 1;
 }
 
-function switchCtx(ctx) {
+function switchCtx(ctx, silent = false) {
   setCtx(ctx);
   syncUi();
-  append("line-meta", `contexto → ${ctx}`);
+  if (!silent) append("line-meta", `contexto → ${ctx}`);
   input.focus();
 }
 
-buttons.forEach((b) => {
-  b.addEventListener("click", () => switchCtx(b.dataset.ctx));
-});
-
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const line = input.value;
-  input.value = "";
+function runLine(line) {
   if (line.trim()) {
     history.push(line);
     histIdx = history.length;
@@ -76,6 +84,55 @@ form.addEventListener("submit", (e) => {
   }
   if (res.text) append(res.kind === "err" ? "line-err" : "line-out", res.text);
   syncUi();
+}
+
+function fillStep() {
+  const s = STEPS[stepIdx];
+  if (getCtx() !== s.ctx) switchCtx(s.ctx, true);
+  else syncUi();
+  input.value = s.cmd;
+  input.focus();
+}
+
+function runStep() {
+  const s = STEPS[stepIdx];
+  if (getCtx() !== s.ctx) {
+    switchCtx(s.ctx, true);
+    append("line-meta", `guia: trocou para ${s.ctx}`);
+  }
+  runLine(s.cmd);
+  if (stepIdx < STEPS.length - 1) {
+    stepIdx += 1;
+    renderGuide();
+  }
+}
+
+buttons.forEach((b) => {
+  b.addEventListener("click", () => switchCtx(b.dataset.ctx));
+});
+
+btnPrev.addEventListener("click", () => {
+  if (stepIdx > 0) {
+    stepIdx -= 1;
+    renderGuide();
+  }
+});
+
+btnNext.addEventListener("click", () => {
+  if (stepIdx < STEPS.length - 1) {
+    stepIdx += 1;
+    renderGuide();
+  }
+});
+
+btnFill.addEventListener("click", fillStep);
+btnRun.addEventListener("click", runStep);
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const line = input.value;
+  input.value = "";
+  runLine(line);
 });
 
 input.addEventListener("keydown", (e) => {
@@ -91,5 +148,13 @@ input.addEventListener("keydown", (e) => {
   }
 });
 
-welcome();
+append(
+  "line-meta",
+  `Simulador interativo do Trabalho 2 — Fundamentos de Redes
+Siga o guia à direita: leia “Por que rodar” → Executar → confira “O que observar”.
+IPs: WAN Pi 192.168.1.31 · LAN host 172.16.0.10 · WAN host 192.168.1.17`
+);
+
+renderGuide();
+syncUi();
 input.focus();

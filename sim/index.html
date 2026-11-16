@@ -20,16 +20,45 @@
   </header>
 
   <aside class="hint" id="hint">
-    Digite <code>demo</code> para o roteiro D0–D7 · <code>help</code> para comandos · <code>pi</code>/<code>lan</code>/<code>wan</code> para trocar de papel
+    Use o <strong>guia à direita</strong> (Preencher / Executar) · ou digite <code>demo</code> / <code>help</code> no terminal
   </aside>
 
-  <main class="term-wrap">
-    <div id="output" class="output" aria-live="polite"></div>
-    <form id="cmd-form" class="cmd-line" autocomplete="off">
-      <label id="prompt" for="cmd-input">[pi]#</label>
-      <input id="cmd-input" type="text" spellcheck="false" autofocus />
-    </form>
-  </main>
+  <div class="layout">
+    <main class="term-wrap">
+      <div id="output" class="output" aria-live="polite"></div>
+      <form id="cmd-form" class="cmd-line" autocomplete="off">
+        <label id="prompt" for="cmd-input">[pi]#</label>
+        <input id="cmd-input" type="text" spellcheck="false" autofocus />
+      </form>
+    </main>
+
+    <aside class="guide" id="guide" aria-label="Guia passo a passo">
+      <div class="guide-head">
+        <span id="guide-stage">D0 · Pré-checagem</span>
+        <span id="guide-progress">1 / N</span>
+      </div>
+      <h2 id="guide-title">Título</h2>
+      <p class="guide-badge" id="guide-ctx">pi</p>
+      <pre class="guide-cmd" id="guide-cmd"></pre>
+      <div class="guide-block">
+        <h3>Por que rodar</h3>
+        <p id="guide-why"></p>
+      </div>
+      <div class="guide-block">
+        <h3>O que observar</h3>
+        <p id="guide-look"></p>
+      </div>
+      <div class="guide-actions">
+        <button type="button" id="guide-prev">Anterior</button>
+        <button type="button" id="guide-fill">Preencher</button>
+        <button type="button" id="guide-run" class="primary">Executar</button>
+        <button type="button" id="guide-next">Próximo</button>
+      </div>
+      <p class="guide-foot">
+        Também em texto: <a href="GUIA.md">GUIA.md</a>
+      </p>
+    </aside>
+  </div>
 
   <script type="module" src="js/terminal.js"></script>
 </body>
