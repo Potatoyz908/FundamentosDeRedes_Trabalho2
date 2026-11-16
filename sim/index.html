@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simulador Lab — Roteador FreeBSD (D0–D7)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>Simulador do lab</h1>
+      <p class="sub">Pi FreeBSD · Host LAN · Host WAN — saídas baseadas nas evidências de 14/11/2026</p>
+    </div>
+    <div class="ctx-btns" role="group" aria-label="Contexto">
+      <button type="button" data-ctx="pi" class="active">pi</button>
+      <button type="button" data-ctx="lan">lan</button>
+      <button type="button" data-ctx="wan">wan</button>
+    </div>
+  </header>
+
+  <aside class="hint" id="hint">
+    Digite <code>demo</code> para o roteiro D0–D7 · <code>help</code> para comandos · <code>pi</code>/<code>lan</code>/<code>wan</code> para trocar de papel
+  </aside>
+
+  <main class="term-wrap">
+    <div id="output" class="output" aria-live="polite"></div>
+    <form id="cmd-form" class="cmd-line" autocomplete="off">
+      <label id="prompt" for="cmd-input">[pi]#</label>
+      <input id="cmd-input" type="text" spellcheck="false" autofocus />
+    </form>
+  </main>
+
+  <script type="module" src="js/terminal.js"></script>
+</body>
+</html>
