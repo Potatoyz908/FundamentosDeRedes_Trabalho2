@@ -7,63 +7,31 @@ function err(text) {
   return { ok: false, text };
 }
 
-const DEMO = `Roteiro D0–D7 (troque de papel com: pi | lan | wan)
+const DEMO = `Roteiro D0–D7 — use o guia no topo ou digite em cada painel (pi/lan/wan ficam abertos juntos).
 
-D0  [pi]  ifconfig ue0 ; ifconfig ue1
-          sysctl net.inet.ip.forwarding
-          service pf status ; service pflog status ; service dnsmasq status
-          pfctl -nf /etc/pf.conf ; dnsmasq --test -C /usr/local/etc/dnsmasq.conf ; sh -n /etc/rc.conf
-
-D1  [pi]  netstat -rn -f inet
-          service pf status ; service dnsmasq status ; service sshd status
-
-D2  [lan] ip -4 addr ; ip route ; resolvectl dns
-          (simule renovação: dhclient)
+D0  [pi]  ifconfig ue0 ; ifconfig ue1 ; sysctl net.inet.ip.forwarding
+D1  [pi]  netstat -rn -f inet ; pfctl -sn ; pfctl -sr
+D2  [lan] dhclient ; ip -4 addr
       [pi]  cat /var/db/dnsmasq.leases
-            grep -E "DHCP(DISCOVER|OFFER|REQUEST|ACK)" /var/log/dnsmasq.log | tail
-
-D3  [lan] ping -c3 172.16.0.1
-          curl -sI http://example.com
-          traceroute -n 8.8.8.8
-
-D4  [pi]  tcpdump -ni ue1 tcp port 80     (em outro "terminal": mude de contexto e volte)
-          tcpdump -ni ue0 tcp port 80
+D3  [lan] ping -c3 172.16.0.1 ; curl -sI http://example.com ; traceroute -n 8.8.8.8
+D4  [pi]  tcpdump -ni ue1 tcp port 80
       [lan] curl -sI http://example.com
       [pi]  pfctl -ss | grep :80
+D5  [wan] rota forçada + ping/nc à LAN ; [pi] contador block ue0
+D6  [lan] nc -lk 8080 ; [wan] telnet 192.168.1.31 80 ; [pi] pfctl -ss | grep 8080
+D7  [lan] ping gateway ok / 8.8.8.8 falha ; [pi] pflog + contador icmp`;
 
-D5  [pi]  pfctl -vs rules | grep -A1 "block drop in on ue0 all"
-      [lan] nc -lk 8080
-      [wan] ping -c3 172.16.0.10
-            sudo ip route add 172.16.0.0/16 via 192.168.1.31
-            ping -c3 172.16.0.10 ; nc -vz -w3 172.16.0.10 8080
-            sudo ip route del 172.16.0.0/16
-      [pi]  (repita o pfctl -vs rules … — Packets sobe)
-
-D6  [lan] nc -lk 8080
-      [wan] telnet 192.168.1.31 80     (ou: nc 192.168.1.31 80)
-      [pi]  pfctl -ss | grep 8080
-
-D7  [pi]  tcpdump -n -e -ttt -i pflog0
-      [lan] ping -c3 172.16.0.1 ; ping -c3 8.8.8.8 ; curl -sI http://example.com
-      [pi]  pfctl -vs rules | grep -A1 "icmp-type echoreq"
-
-Extra [pi] service dnsmasq stop ; sockstat -4l | grep :67
-           service dnsmasq start ; sockstat -4l | grep :67`;
-
-const HELP = `Comandos meta:
-  pi | lan | wan   troca o papel (ou use os botões)
+const HELP = `Comandos meta (em qualquer painel):
   demo             roteiro D0–D7
   reset            reinicia o estado do lab
-  clear            limpa a tela
+  clear            limpa este painel
   help             esta ajuda
 
-Pi (FreeBSD root): ifconfig, sysctl, netstat, service, pfctl, tcpdump,
-  sockstat, cat /var/db/dnsmasq.leases, grep … dnsmasq.log,
-  dnsmasq --test, sh -n /etc/rc.conf
+Pi: ifconfig, sysctl, netstat, service, pfctl, tcpdump, sockstat, leases/log dnsmasq
+LAN: ip, ping, curl, traceroute, nc -lk 8080, dhclient
+WAN: ping, ip route add|del, nc / telnet, nc -vz
 
-LAN: ip, ping, curl, traceroute, nc -lk 8080, dhclient / nmcli / ipconfig
-
-WAN: ping, ip route add|del, nc / telnet, nc -vz`;
+O guia no topo explica Kurose (Cap. 4 / 5.7 / 8.9) e executa no terminal certo.`;
 
 function normalize(raw) {
   return raw

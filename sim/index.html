@@ -3,35 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Simulador Lab — Roteador FreeBSD (D0–D7)</title>
+  <title>Simulador Lab — Três terminais + Kurose</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="top">
-    <div>
+    <div class="top-left">
       <h1>Simulador do lab</h1>
-      <p class="sub">Pi FreeBSD · Host LAN · Host WAN — saídas baseadas nas evidências de 14/11/2026</p>
+      <p class="sub">pi · lan · wan juntos · Kurose 6ª ed. · evidências 14/11/2026</p>
     </div>
-    <div class="ctx-btns" role="group" aria-label="Contexto">
-      <button type="button" data-ctx="pi" class="active">pi</button>
-      <button type="button" data-ctx="lan">lan</button>
-      <button type="button" data-ctx="wan">wan</button>
+    <p class="hint-inline">Guia à esquerda · <strong>Executar</strong> no terminal destacado · digite em qualquer painel</p>
+    <div class="legend" aria-hidden="true">
+      <span class="lg pi">pi</span>
+      <span class="lg lan">lan</span>
+      <span class="lg wan">wan</span>
     </div>
   </header>
 
-  <aside class="hint" id="hint">
-    Use o <strong>guia à direita</strong> (Preencher / Executar) · ou digite <code>demo</code> / <code>help</code> no terminal
-  </aside>
-
-  <div class="layout">
-    <main class="term-wrap">
-      <div id="output" class="output" aria-live="polite"></div>
-      <form id="cmd-form" class="cmd-line" autocomplete="off">
-        <label id="prompt" for="cmd-input">[pi]#</label>
-        <input id="cmd-input" type="text" spellcheck="false" autofocus />
-      </form>
-    </main>
-
+  <div class="workspace">
     <aside class="guide" id="guide" aria-label="Guia passo a passo">
       <div class="guide-head">
         <span id="guide-stage">D0 · Pré-checagem</span>
@@ -40,24 +29,73 @@
       <h2 id="guide-title">Título</h2>
       <p class="guide-badge" id="guide-ctx">pi</p>
       <pre class="guide-cmd" id="guide-cmd"></pre>
+
       <div class="guide-block">
-        <h3>Por que rodar</h3>
+        <h3>No lab — por que este comando</h3>
         <p id="guide-why"></p>
       </div>
+      <div class="guide-block kurose">
+        <h3>Kurose — conceito e funcionamento</h3>
+        <p id="guide-kurose"></p>
+      </div>
       <div class="guide-block">
-        <h3>O que observar</h3>
+        <h3>Fluxo neste passo</h3>
+        <p id="guide-flow"></p>
+      </div>
+      <div class="guide-block">
+        <h3>O que observar / narrar</h3>
         <p id="guide-look"></p>
       </div>
+
       <div class="guide-actions">
         <button type="button" id="guide-prev">Anterior</button>
+        <button type="button" id="guide-next">Próximo</button>
         <button type="button" id="guide-fill">Preencher</button>
         <button type="button" id="guide-run" class="primary">Executar</button>
-        <button type="button" id="guide-next">Próximo</button>
       </div>
-      <p class="guide-foot">
-        Também em texto: <a href="GUIA.md">GUIA.md</a>
-      </p>
+      <p class="guide-foot"><a href="GUIA.md">GUIA.md</a> · texto completo</p>
     </aside>
+
+    <div class="terms" id="terms">
+      <section class="term-pane" data-ctx="pi">
+        <header class="term-bar">
+          <span class="dot"></span>
+          <strong>pi</strong>
+          <span class="term-sub">FreeBSD · WAN 192.168.1.31 · LAN 172.16.0.1</span>
+        </header>
+        <div class="output" data-output="pi"></div>
+        <form class="cmd-line" data-form="pi" autocomplete="off">
+          <label class="prompt">[pi]#</label>
+          <input type="text" data-input="pi" spellcheck="false" />
+        </form>
+      </section>
+
+      <section class="term-pane" data-ctx="lan">
+        <header class="term-bar">
+          <span class="dot"></span>
+          <strong>lan</strong>
+          <span class="term-sub">host · 172.16.0.10</span>
+        </header>
+        <div class="output" data-output="lan"></div>
+        <form class="cmd-line" data-form="lan" autocomplete="off">
+          <label class="prompt">[lan]$</label>
+          <input type="text" data-input="lan" spellcheck="false" />
+        </form>
+      </section>
+
+      <section class="term-pane" data-ctx="wan">
+        <header class="term-bar">
+          <span class="dot"></span>
+          <strong>wan</strong>
+          <span class="term-sub">acesso · 192.168.1.17</span>
+        </header>
+        <div class="output" data-output="wan"></div>
+        <form class="cmd-line" data-form="wan" autocomplete="off">
+          <label class="prompt">[wan]$</label>
+          <input type="text" data-input="wan" spellcheck="false" />
+        </form>
+      </section>
+    </div>
   </div>
 
   <script type="module" src="js/terminal.js"></script>
