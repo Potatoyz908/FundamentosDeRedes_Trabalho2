@@ -21,6 +21,7 @@ docs/2-instalacao.md       do cartão SD ao roteador pronto
 docs/3-validacao.md        testes passo a passo, com resultado esperado
 docs/4-demonstracao.md     roteiro da demonstração, perguntas prováveis e plano B
 docs/5-auditoria.md        resultado da validação de 14/11/2026 e pendências
+docs/6-divisao-equipe.md   quem responde por cada parte na demonstração
 docs/img/                  diagramas (topologia, NAT/DNAT, DHCP)
 evidencias/                saídas reais dos testes (prints/ e auditoria_2026-11-14.txt)
 versoes.txt                versões do sistema e dos serviços

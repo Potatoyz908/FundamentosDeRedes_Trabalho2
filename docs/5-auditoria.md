@@ -30,6 +30,23 @@ Feita por acesso SSH à Raspberry Pi (FreeBSD 15.1) e testes a partir do noteboo
 
 Criou-se um namespace de rede temporário (`wan`, com `ipvlan` sobre o Wi-Fi, IP 192.168.1.17) que age como máquina do lado WAN, mais uma rota de retorno `192.168.1.17/32 via 172.16.0.1` no notebook para a resposta do servidor da LAN voltar pela Pi. Tudo removido ao final (`limpa.sh`). Num cenário real isso equivale a um segundo equipamento na rede de acesso com a Pi como gateway da LAN.
 
+## Cenários extras pedidos pelo professor (executados em 16/11/2026)
+
+Relatos de outros grupos: bloquear um IP, fazer a LAN falar com um cliente na WLAN, mudar o IP de um computador, cortar a conexão e outros itens. Todos foram executados na Pi com restauração do estado original depois de cada um (regras, NAT e arquivos idênticos aos de `configs/`). Procedimentos em [4-demonstracao.md](4-demonstracao.md), seção "Pedidos extras"; saídas reais em `evidencias/extras_2026-11-16.txt`.
+
+| Pedido | Resultado | Observação |
+| --- | --- | --- |
+| Bloquear um host da LAN | OK | `block drop log quick on ue1 ... from 172.16.0.10 to ! 172.16.0.0/16` + `pfctl -k`: `http=200` virou `000`, gateway continuou respondendo, `pflog0` registrou |
+| Bloquear um IP de destino | OK | Conexão já aberta continuou passando; nova conexão bloqueada; `pfctl -F states` derruba as antigas |
+| LAN → WLAN | TCP OK; ping bloqueado pelo requisito | O servidor da WLAN viu a origem 192.168.1.29 (NAT). Exceção `pass in quick ... to IP` acima da regra `REQUISITO` libera o ping só para esse IP |
+| WLAN → LAN | OK com regra e rota | `pass in on ue0 ... to 172.16.0.0/16` no fim do arquivo e rota via Pi no cliente; sem isso, timeout |
+| Mudar o IP reservado do host | OK | `dhcp-host` + `host_alvo`; apagar a lease antiga; o cliente precisa derrubar/subir a interface (lease `infinite`); DNAT chegou ao novo IP |
+| IP manual em um computador | OK | `pf` trata qualquer origem de 172.16.0.0/16 |
+| Cortar a conexão | OK | `pfctl -F nat`/`-F states`, `pfctl -k`, `ifconfig ue0 down` + `service dhclient restart ue0`, `ifconfig ue1 down`, `service dnsmasq stop` |
+| Bloquear porta, liberar ping, mudar a porta do DNAT | OK | Porta 80 bloqueada (443 passa); ping liberado comentando a regra; DNAT para 9090 |
+
+Achados: a Pi reiniciou e subiu `pf`, `pflog` e `dnsmasq` sozinha (persistência no boot confirmada); o IP da WAN mudou entre sessões (192.168.1.31 para .29) sem exigir ajuste, porque o NAT usa `(ue0)`; `ifconfig ue1 down` derruba o SSH que entra pela LAN.
+
 ## Pendências (não dá para resolver sozinho)
 
 1. **Host de testes do professor:** a reserva está no MAC `0c:cc:47:ec:09:6b` (este notebook). Se o professor usar outro, ler o MAC no log e trocar `dhcp-host` (ver README, passo 5). Sugestão: já listar o MAC de cada notebook do grupo na mesma linha (`dhcp-host=MAC1,MAC2,nome,172.16.0.10`).
@@ -37,4 +54,4 @@ Criou-se um namespace de rede temporário (`wan`, com `ipvlan` sobre o Wi-Fi, IP
 3. **Antes de entregar:** montar o ZIP (README, `configs/`, `versoes.txt`, `docs/`, `evidencias/`), validar de novo os arquivos a partir do ZIP. Os prints dos testes já estão em `evidencias/prints/`.
 4. **Plágio:** as configs e os textos são do grupo. O `docs/PLANO.md` (rascunho interno) cita nominalmente o repositório de referência; não deve ir para o repositório nem para o ZIP.
 5. NTP: `ntpq -p` mostrava `reach 0` logo após o boot; a data estava correta. Conferir de novo na apresentação (`date`).
-6. Não foi feito reboot nesta auditoria (a Pi já tinha reiniciado ~55 min antes); o comportamento no boot foi inferido pelos serviços ativos.
+6. O boot foi confirmado em 16/11/2026: a Pi reiniciou antes dos testes e `pf`, `pflog` e `dnsmasq` subiram sozinhos. Não houve um reboot comandado por nós; conferir de novo no dia.
