@@ -1,0 +1,64 @@
+Pedidos extras do professor - execucao real em 16/11/2026 (Pi FreeBSD 15.1; WAN 192.168.1.29; host LAN 172.16.0.10)
+Cliente "WLAN" simulado por namespace de rede (192.168.1.17, ipvlan no Wi-Fi). Antes: backup dos arquivos; depois de cada teste: regras (pfctl -sr) e NAT (pfctl -sn) identicos aos originais.
+
+== P1a Bloquear um host da LAN
+antes : curl http://104.20.23.154 (Host: example.com) -> http=200
+regra : (cat /etc/pf.conf; echo 'block drop log quick on ue1 inet from 172.16.0.10 to ! 172.16.0.0/16') | pfctl -f -
+        pfctl -k 172.16.0.10 -> "killed 288 states from 1 sources and 0 destinations"
+depois: curl -> http=000 ; ping 172.16.0.1 -> 2/2 (gateway continua respondendo)
+pflog0: pacotes de 172.16.0.10 bloqueados (ex.: 172.16.0.10.35732 > 164.41.101.4.53 [S])
+contador: "block drop log quick on ue1 ... from 172.16.0.10 to ! 172.16.0.0/16"  Packets: 104
+restaurar: pfctl -f /etc/pf.conf -> REGRAS_IGUAIS ; curl -> http=200
+
+== P1b Bloquear um IP de destino (e a pegadinha do estado aberto)
+conexao TCP aberta ANTES da regra; regra: block drop log quick on ue1 inet from 172.16.0.0/16 to 104.20.23.154 (sem derrubar estados)
+conexao ja aberta continuou passando: "HTTP/1.1 200 OK"
+nova conexao (sem -F): http=000 ; pfctl -F states -> "644 states cleared" ; nova conexao: http=000
+outro destino (1.1.1.1): http=301 (passa) ; contador da regra: Packets: 10
+restaurar: REGRAS_IGUAIS ; curl -> http=200
+
+== P2 LAN <-> WLAN
+LAN -> WLAN TCP: echo oi_da_LAN | nc 192.168.1.17 9000 -> servidor WLAN recebeu "oi_da_LAN"; origem vista: 192.168.1.29 (IP da WAN da Pi, NAT)
+  Pi: tcp 192.168.1.29:56644 (172.16.0.10:46480) -> 192.168.1.17:9000
+LAN -> WLAN ping: 100% de perda (regra do ICMP, requisito)
+excecao (inserida acima da linha "# REQUISITO ENUNCIADO", pfctl -nf SINTAXE_OK):
+  pass in quick on $lan_if inet proto icmp from $rede_lan to 192.168.1.17 icmp-type echoreq keep state
+  ping 192.168.1.17: 0% de perda ; ping 8.8.8.8: continua 100% de perda ; restaurar: REGRAS_IGUAIS
+WLAN -> LAN: rota no cliente WLAN (ip route replace 172.16.0.0/16 via 192.168.1.29)
+  sem regra : nc -vz 172.16.0.10 8080 -> timed out ; ping -> 100% perda
+  regra (no fim do arquivo): pass in on ue0 inet from 192.168.1.17 to 172.16.0.0/16 keep state
+  com regra : nc -vz 172.16.0.10 8080 -> succeeded ; ping -> 0% perda
+  Pi: tcp 172.16.0.10:8080 <- 192.168.1.17:49556 ; icmp 172.16.0.10:8 <- 192.168.1.17:42559
+  depois de restaurar: volta a falhar (timeout / 100% perda)
+
+== P3b IP manual na LAN
+ip addr add 172.16.0.50/16 dev enp44s0 ; curl --interface 172.16.0.50 -> http=200
+Pi: tcp 192.168.1.29:64219 (172.16.0.50:49294) -> 104.20.23.154:80 ; IP removido depois
+
+== P3a Mudar o IP reservado do host (172.16.0.10 -> 172.16.0.20)
+Pi: sed em dnsmasq.conf (dhcp-host ...,172.16.0.20,infinite) e em pf.conf (host_alvo = "172.16.0.20"); dnsmasq --test e pfctl -nf OK;
+    service dnsmasq stop ; apagar a lease 172.16.0.10 do /var/db/dnsmasq.leases ; service dnsmasq start ; pfctl -f /etc/pf.conf
+    pfctl -sn: rdr on ue0 ... -> 172.16.0.20 port 8080
+host: nmcli connection down/up -> 172.16.0.20/16 ; log: DHCPDISCOVER, DHCPOFFER 172.16.0.20, DHCPREQUEST, DHCPACK (ciclo completo)
+DNAT para o novo IP: WLAN -> 192.168.1.29:80 ; servidor 172.16.0.20:8080 recebeu "ola_do_WLAN"
+    Pi: tcp 172.16.0.20:8080 (192.168.1.29:80) <- 192.168.1.17:54950
+restaurar: backups copiados de volta, lease original, renovacao -> 172.16.0.10 ; arquivos da Pi = configs/ (diff vazio)
+
+== P4 Cortar a conexao
+pfctl -F nat ; pfctl -F states ("nat cleared", "790 states cleared"): host curl http=000, ping ao gateway 2/2; pfctl -f /etc/pf.conf -> NAT_IGUAL, REGRAS_IGUAIS, curl http=200
+ifconfig ue0 down: flags sem UP, "ping: sendto: Network is down", host http=000
+ifconfig ue0 up ; service dhclient restart ue0: "DHCPACK from 192.168.1.254 ... bound to 192.168.1.29", host http=200
+ifconfig ue1 down (12 s, restaurado em background): host 100% de perda; depois 0% e IP 172.16.0.10 mantido.
+    OBS: a sessao SSH aberta pela LAN cai (Connection reset by peer); reconectar.
+pfctl -k 192.168.1.17 em conexao aberta (WLAN -> DNAT): "killed 4 states from 1 sources and 0 destinations"; servidor recebeu "antes", nao recebeu "depois"
+service dnsmasq stop/start: ver auditoria_2026-11-14.txt
+
+== P5 Outros
+bloquear porta 80 (block drop log quick on ue1 proto tcp from any to any port 80 + pfctl -F states): 80 -> timed out ; 443 -> succeeded ; restaurar: REGRAS_IGUAIS
+liberar o ping (sed 's/^block in quick log on/# &/' /etc/pf.conf | pfctl -f -): ping 8.8.8.8 -> 0% perda ; restaurar: volta a 100% perda
+mudar a porta do DNAT (porta_servico = "9090", pfctl -nf OK, pfctl -f): rdr ... -> 172.16.0.10 port 9090 ; nc -lk 9090 recebeu "ola_porta_9090" da WLAN ; restaurar: REGRAS_IGUAIS
+
+== Outras observacoes
+- Pi reiniciada antes dos testes: pf, pflog e dnsmasq subiram sozinhos no boot ("Enabled for 0 days 00:05:32").
+- O IP da WAN da Pi mudou entre as sessoes (192.168.1.31 -> 192.168.1.29): a regra nat usa (ue0), sem ajuste.
+- pfctl -F states e -k nao derrubaram a sessao SSH de administracao (pf sem regra casando deixa passar); ifconfig ue1 down derruba.
