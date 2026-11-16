@@ -24,9 +24,12 @@ docs/5-auditoria.md        resultado da validação de 14/11/2026 e pendências
 docs/6-divisao-equipe.md   quem responde por cada parte na demonstração
 docs/img/                  diagramas (topologia, NAT/DNAT, DHCP)
 evidencias/                saídas reais dos testes (prints/ e auditoria_2026-11-14.txt)
+sim/                       simulador web interativo (Pi/LAN/WAN) para ensaiar D0–D7
 versoes.txt                versões do sistema e dos serviços
 referencias/               enunciado do trabalho
 ```
+
+**Ensaio sem hardware:** abra [`sim/index.html`](sim/index.html) (ou `python -m http.server` dentro de `sim/`) — ver [`sim/README.md`](sim/README.md). Pronto para GitHub Pages.
 
 ## 3. Ambiente e sistema operacional
 
