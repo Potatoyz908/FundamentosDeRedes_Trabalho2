@@ -1,6 +1,6 @@
 # Simulador interativo do lab (D0–D7)
 
-Terminal web estático que simula os três papéis da demonstração (**pi**, **lan**, **wan**) com saídas fiéis às evidências de 14/11/2026.
+Terminal web estático: **guia à esquerda** (por quê + Kurose + fluxo + o que narrar) e **três painéis** (**pi** / **lan** / **wan**) ocupando o restante da tela, com saídas fiéis às evidências de 14/11/2026.
 
 ## Uso local
 
@@ -12,20 +12,19 @@ python -m http.server 8765
 ```
 
 2. Acesse `http://localhost:8765`
-3. No painel **Guia** à direita: leia *Por que rodar* → **Executar** (ou **Preencher** + Enter) → confira *O que observar*.
-4. Versão em Markdown (também no Pages): [`GUIA.md`](GUIA.md).
+3. No **Guia** (coluna esquerda): leia os quatro blocos → **Executar** (destaca o painel certo) → compare a saída nos três terminais à direita.
+4. Texto completo: [`GUIA.md`](GUIA.md).
 
 > Módulos ES (`type="module"`) exigem HTTP em alguns navegadores — prefira o `http.server` acima em vez de `file://` se algo não carregar.
 
-## Comandos meta
+## Comandos meta (em qualquer painel)
 
 | Comando | Efeito |
 | --- | --- |
-| `pi` / `lan` / `wan` | Troca o papel |
 | `demo` | Lista D0–D7 |
 | `help` | Ajuda resumida |
 | `reset` | Reinicia contadores, serviços e sessões |
-| `clear` | Limpa a tela |
+| `clear` | Limpa aquele painel |
 
 ## GitHub Pages (depois)
 
