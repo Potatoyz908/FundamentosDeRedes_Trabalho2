@@ -6,8 +6,8 @@
 <text x="490" y="52" text-anchor="middle" font-weight="bold">Pi (dnsmasq)</text>
 <line x1="110" y1="60" x2="110" y2="280" stroke="#999"/><line x1="490" y1="60" x2="490" y2="280" stroke="#999"/>
 <line x1="110" y1="90" x2="490" y2="90" stroke="#333" marker-end="url(#b)"/><text x="300" y="84" text-anchor="middle">1. DISCOVER (broadcast)</text>
-<line x1="490" y1="140" x2="110" y2="140" stroke="#333" marker-end="url(#b)"/><text x="300" y="134" text-anchor="middle">2. OFFER 172.16.0.10 (reserva por MAC)</text>
-<line x1="110" y1="190" x2="490" y2="190" stroke="#333" marker-end="url(#b)"/><text x="300" y="184" text-anchor="middle">3. REQUEST 172.16.0.10</text>
+<line x1="490" y1="140" x2="110" y2="140" stroke="#333" marker-end="url(#b)"/><text x="300" y="134" text-anchor="middle">2. OFFER 172.16.10.111 (reserva por MAC)</text>
+<line x1="110" y1="190" x2="490" y2="190" stroke="#333" marker-end="url(#b)"/><text x="300" y="184" text-anchor="middle">3. REQUEST 172.16.10.111</text>
 <line x1="490" y1="240" x2="110" y2="240" stroke="#333" marker-end="url(#b)"/><text x="300" y="234" text-anchor="middle">4. ACK + máscara, gateway, DNS</text>
 <text x="300" y="285" text-anchor="middle" fill="#555" font-size="12">registro: /var/log/dnsmasq.log e /var/db/dnsmasq.leases</text>
 </svg>

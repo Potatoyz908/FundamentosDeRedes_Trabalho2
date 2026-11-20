@@ -75,7 +75,7 @@ Desligar sempre com `shutdown -p now`, para não corromper o microSD.
    ```sh
    dnsmasq --test -C /usr/local/etc/dnsmasq.conf && service dnsmasq restart
    ```
-4. Renovar o DHCP no host: ele deve receber `172.16.0.10`. É possível listar vários MACs na mesma linha (`dhcp-host=MAC1,MAC2,nome,172.16.0.10`), desde que só um esteja ligado por vez.
+4. Renovar o DHCP no host: ele deve receber `172.16.10.111`. É possível listar vários MACs na mesma linha (`dhcp-host=MAC1,MAC2,nome,172.16.10.111`), desde que só um esteja ligado por vez.
 
 ## 8. No laboratório
 

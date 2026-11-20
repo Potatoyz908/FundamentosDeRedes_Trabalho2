@@ -12,7 +12,7 @@
 <text x="385" y="172" text-anchor="middle" fill="#6b4200">hostname roteador-fdr</text>
 <rect x="580" y="70" width="160" height="100" rx="8" fill="#e9f7ec" stroke="#2e8b4a" stroke-width="2"/>
 <text x="660" y="105" text-anchor="middle" font-weight="bold" fill="#1d5a30">Host de testes</text>
-<text x="660" y="128" text-anchor="middle" fill="#1d5a30">172.16.0.10 (DHCP fixo)</text>
+<text x="660" y="128" text-anchor="middle" fill="#1d5a30">172.16.10.111 (DHCP fixo)</text>
 <text x="660" y="150" text-anchor="middle" fill="#1d5a30">nc -lk 8080</text>
 <line x1="190" y1="120" x2="290" y2="120" stroke="#333" stroke-width="2"/>
 <line x1="480" y1="120" x2="580" y2="120" stroke="#333" stroke-width="2"/>

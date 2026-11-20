@@ -13,7 +13,7 @@ No dia, quem estiver na Pi (dois terminais SSH) e quem estiver no host de testes
 
 ## O que os 4 precisam saber
 
-- A topologia: Pi com `ue0` (WAN, rede de acesso) e `ue1` (LAN 172.16.0.1/16, adaptador USB); host de testes em 172.16.0.10.
+- A topologia: Pi com `ue0` (WAN, rede de acesso) e `ue1` (LAN 172.16.0.1/16, adaptador USB); host de testes em 172.16.10.111.
 - Os três arquivos e onde ficam na Pi: `rc.conf` (`/etc/rc.conf`), `pf.conf` (`/etc/pf.conf`), `dnsmasq.conf` (`/usr/local/etc/dnsmasq.conf`).
 - Validar antes de aplicar: `pfctl -nf`, `dnsmasq --test -C`, `sh -n`. Arquivo com erro é anulado.
 - Regra de ouro do `pf`: NAT/`rdr` primeiro; no filtro vale a **última** regra que casa, salvo `quick`.
@@ -65,7 +65,7 @@ service pf status ; service pflog status ; service dnsmasq status ; service sshd
 - `port=0`: desliga o DNS do dnsmasq; só DHCP. O DNS é entregue ao cliente por opção (164.41.101.4 e .11).
 - `interface=ue1` e `bind-interfaces`: só atende a LAN. `dhcp-authoritative`: único servidor da rede.
 - `dhcp-range=172.16.1.1,172.16.1.254,255.255.0.0,12h`: faixa dinâmica, lease de 12 h.
-- `dhcp-host=MAC,host-avaliacao,172.16.0.10,infinite`: a reserva por MAC; por isso o host recebe sempre o mesmo IP.
+- `dhcp-host=MAC,host-avaliacao,172.16.10.111,infinite`: a reserva por MAC; por isso o host recebe sempre o mesmo IP.
 - Onde ver as leases: `/var/db/dnsmasq.leases` (formato `validade MAC IP nome`) e `/var/log/dnsmasq.log`.
 - Trocar o host de testes: ler o MAC no log, editar `dhcp-host=`, `service dnsmasq restart`. Vários MACs na mesma linha servem, com só um host ligado por vez.
 
@@ -78,7 +78,7 @@ dnsmasq --test -C /usr/local/etc/dnsmasq.conf
 No host: renovar o DHCP e mostrar `ip -4 addr`, `ip route show default`, `resolvectl dns` (ou `ipconfig /renew` e `ipconfig /all` no Windows).
 
 **Se o professor pedir**
-- "Use outra máquina como host": plugar, `grep DHCP /var/log/dnsmasq.log | tail`, copiar o MAC, ajustar a linha e reiniciar o serviço; renovar no host e mostrar `172.16.0.10`.
+- "Use outra máquina como host": plugar, `grep DHCP /var/log/dnsmasq.log | tail`, copiar o MAC, ajustar a linha e reiniciar o serviço; renovar no host e mostrar `172.16.10.111`.
 - "Mostre as leases": os dois comandos acima.
 - "Mude o DNS para 192.168.X.1": editar `dhcp-option=option:dns-server`, validar, reiniciar o serviço, renovar no host.
 - "Mude o IP deste host para 172.16.0.20": trocar o IP em `dhcp-host`, apagar a lease antiga do `/var/db/dnsmasq.leases` com o serviço parado, e avisar o dono do DNAT que a macro `host_alvo` do `pf.conf` também muda. No host, derrubar e subir a interface (a lease é `infinite`).
@@ -106,7 +106,7 @@ No host: renovar o DHCP e mostrar `ip -4 addr`, `ip route show default`, `resolv
 **Comandos de cor**
 ```sh
 pfctl -sn ; pfctl -sr
-tcpdump -ni ue1 tcp port 80       # LAN: origem 172.16.0.10
+tcpdump -ni ue1 tcp port 80       # LAN: origem 172.16.10.111
 tcpdump -ni ue0 tcp port 80       # WAN: origem = IP da WAN
 pfctl -ss | grep :80
 pfctl -vs rules | grep -A1 "block drop in on ue0 all"   # contador
@@ -115,9 +115,9 @@ No host: `ping -c3 172.16.0.1`, `curl -sI http://example.com`, `traceroute -n 8.
 
 **Se o professor pedir**
 - "Mostre o NAT": `tcpdump` nas duas interfaces + `curl` no host + `pfctl -ss` (mesma conexão, origem diferente).
-- "Prove o isolamento": da WAN, `sudo ip route add 172.16.0.0/16 via IP_WAN_DA_PI`, ping e `nc -vz -w3 172.16.0.10 8080` falham e o contador sobe; depois `sudo ip route del 172.16.0.0/16`.
+- "Prove o isolamento": da WAN, `sudo ip route add 172.16.0.0/16 via IP_WAN_DA_PI`, ping e `nc -vz -w3 172.16.10.111 8080` falham e o contador sobe; depois `sudo ip route del 172.16.0.0/16`.
 - "Recarregue as regras": `pfctl -nf /etc/pf.conf && pfctl -f /etc/pf.conf`.
-- "Bloqueie o IP de X": `(cat /etc/pf.conf; echo 'block drop log quick on ue1 inet from 172.16.0.10 to ! 172.16.0.0/16') | pfctl -f -` e `pfctl -k 172.16.0.10`; provar no `pflog0`; desfazer com `pfctl -f /etc/pf.conf`. Para um IP de destino: `from 172.16.0.0/16 to IP` e `pfctl -F states`.
+- "Bloqueie o IP de X": `(cat /etc/pf.conf; echo 'block drop log quick on ue1 inet from 172.16.10.111 to ! 172.16.0.0/16') | pfctl -f -` e `pfctl -k 172.16.10.111`; provar no `pflog0`; desfazer com `pfctl -f /etc/pf.conf`. Para um IP de destino: `from 172.16.0.0/16 to IP` e `pfctl -F states`.
 - "Corte a conexão": `pfctl -F nat ; pfctl -F states` (sem NAT os clientes perdem a internet); restaurar com `pfctl -f /etc/pf.conf`.
 - "Por que a conexão continuou depois do bloqueio?": estado aberto; derrubar com `pfctl -k` ou `pfctl -F states`.
 
@@ -133,7 +133,7 @@ No host: `ping -c3 172.16.0.1`, `curl -sI http://example.com`, `traceroute -n 8.
 **Arquivo:** `configs/pf.conf` (`rdr`, `tag`/`tagged` e a regra do ICMP).
 
 **Precisa saber explicar**
-- `rdr on ue0 inet proto tcp from any to (ue0) port 80 tag DNAT_TESTE -> 172.16.0.10 port 8080`: troca o **destino** (porta 80 da WAN para a 8080 do host).
+- `rdr on ue0 inet proto tcp from any to (ue0) port 80 tag DNAT_TESTE -> 172.16.10.111 port 8080`: troca o **destino** (porta 80 da WAN para a 8080 do host).
 - `pass in on ue0 ... tagged DNAT_TESTE`: só o que o `rdr` marcou entra na LAN; o filtro vê o destino já traduzido.
 - O host da LAN precisa ter a Pi como gateway para a resposta voltar (o DHCP entrega isso).
 - A regra do ping: `block in quick log on ue1 inet proto icmp from 172.16.0.0/16 to ! 172.16.0.0/16 icmp-type echoreq`. `quick` garante que vale mesmo com o `pass` depois; `log` copia para `pflog0`; só echo request para fora da LAN (o gateway responde, curl e traceroute UDP seguem).

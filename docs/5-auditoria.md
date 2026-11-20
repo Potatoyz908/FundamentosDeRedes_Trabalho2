@@ -1,6 +1,6 @@
 # Auditoria do Trabalho 02 (14/11/2026)
 
-Feita por acesso SSH à Raspberry Pi (FreeBSD 15.1) e testes a partir do notebook, que estava na LAN (172.16.0.10) e também no Wi-Fi da rede de acesso (192.168.1.16). Nenhum arquivo de configuração foi alterado, nada foi commitado. Saídas brutas em `evidencias/auditoria_2026-11-14.txt`.
+Nota: esta auditoria é de 14/11/2026, com o host em 172.16.0.10; depois a reserva passou a 172.16.10.111 (pedido do professor). Feita por acesso SSH à Raspberry Pi (FreeBSD 15.1) e testes a partir do notebook, que estava na LAN (172.16.0.10) e também no Wi-Fi da rede de acesso (192.168.1.16). Nenhum arquivo de configuração foi alterado, nada foi commitado. Saídas brutas em `evidencias/auditoria_2026-11-14.txt`.
 
 ## Resultado por requisito
 

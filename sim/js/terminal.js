@@ -175,7 +175,7 @@ append(
 append(
   "lan",
   "line-meta",
-  "Host LAN 172.16.0.10\nEx.: ping, curl, nc -lk 8080"
+  "Host LAN 172.16.10.111\nEx.: ping, curl, nc -lk 8080"
 );
 append(
   "wan",

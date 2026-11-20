@@ -177,7 +177,7 @@ function pfctl(args) {
   }
   if (joined.includes("-sn") && !joined.includes("-sr")) {
     return ok(
-      `nat on ue0 inet from 172.16.0.0/16 to any -> (ue0) round-robin\nrdr on ue0 inet proto tcp from any to (ue0) port = http tag DNAT_TESTE -> 172.16.0.10 port 8080`
+      `nat on ue0 inet from 172.16.0.0/16 to any -> (ue0) round-robin\nrdr on ue0 inet proto tcp from any to (ue0) port = http tag DNAT_TESTE -> 172.16.10.111 port 8080`
     );
   }
   if (joined.includes("-sr") && !joined.includes("-sn")) {
@@ -194,7 +194,7 @@ pass out on ue0 all flags S/SA keep state`);
   }
   if (joined.includes("-sn") || (args.includes("-sn") && args.includes("-sr"))) {
     return ok(`nat on ue0 inet from 172.16.0.0/16 to any -> (ue0) round-robin
-rdr on ue0 inet proto tcp from any to (ue0) port = http tag DNAT_TESTE -> 172.16.0.10 port 8080
+rdr on ue0 inet proto tcp from any to (ue0) port = http tag DNAT_TESTE -> 172.16.10.111 port 8080
 scrub in all fragment reassemble
 block drop in log quick on ue1 inet proto icmp from 172.16.0.0/16 to ! 172.16.0.0/16 icmp-type echoreq
 pass in on ue1 all flags S/SA keep state
@@ -316,10 +316,10 @@ function renewDhcp() {
   const id = Math.floor(Math.random() * 2e9);
   const ts = "Nov 14 16:30:00";
   state.dhcpLog.push(
-    `${ts} dnsmasq-dhcp[${state.dnsmasq.pid}]: ${id} DHCPREQUEST(ue1) 172.16.0.10 ${CFG.macHost}`
+    `${ts} dnsmasq-dhcp[${state.dnsmasq.pid}]: ${id} DHCPREQUEST(ue1) 172.16.10.111 ${CFG.macHost}`
   );
   state.dhcpLog.push(
-    `${ts} dnsmasq-dhcp[${state.dnsmasq.pid}]: ${id} DHCPACK(ue1) 172.16.0.10 ${CFG.macHost} host-avaliacao`
+    `${ts} dnsmasq-dhcp[${state.dnsmasq.pid}]: ${id} DHCPACK(ue1) 172.16.10.111 ${CFG.macHost} host-avaliacao`
   );
 }
 
@@ -548,7 +548,7 @@ function handleWan(cmd) {
 
   if (bin === "ping") {
     const target = tokens.find((t) => /^\d+\.\d+\.\d+\.\d+$/.test(t)) || "";
-    if (target === CFG.ipLanHost || target === "172.16.0.10") {
+    if (target === CFG.ipLanHost || target === "172.16.10.111") {
       if (state.wanForcedRoute) {
         state.blockUe0Packets += 3;
         state.blockUe0Evals += 6;

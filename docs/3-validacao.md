@@ -1,6 +1,6 @@
 # Validação: como provar cada requisito
 
-Notação: **Pi** = roteador FreeBSD (`ue0` WAN, `ue1` LAN); **LAN** = host de testes (172.16.0.10); **WAN** = outro equipamento na rede de acesso. Trabalhar com **dois terminais**: um no host e outro com `ssh freebsd@172.16.0.1` (depois `su -`) na Pi. Cada teste mostra onde rodar, o comando, o resultado esperado e o que ele prova. As imagens em `../evidencias/prints/` são a execução real de 14/11/2026.
+Notação: **Pi** = roteador FreeBSD (`ue0` WAN, `ue1` LAN); **LAN** = host de testes (172.16.10.111); **WAN** = outro equipamento na rede de acesso. Trabalhar com **dois terminais**: um no host e outro com `ssh freebsd@172.16.0.1` (depois `su -`) na Pi. Cada teste mostra onde rodar, o comando, o resultado esperado e o que ele prova. As imagens em `../evidencias/prints/` são a execução real de 14/11/2026.
 
 ## Preparar os hosts
 
@@ -36,26 +36,26 @@ curl -sI http://example.com | head -1     # ou curl -I https://www.freebsd.org
 traceroute -n 8.8.8.8                     # não usar -I: o ICMP é bloqueado de propósito
 ```
 
-Esperado: 172.16.0.10/16, default via 172.16.0.1, ping respondido, `HTTP/1.1 200 OK`, primeiro salto 172.16.0.1. **Prova:** a LAN alcança o gateway e, através dele, a rede externa. Imagem: `04_teste1_conectividade.png`.
+Esperado: 172.16.10.111/16, default via 172.16.0.1, ping respondido, `HTTP/1.1 200 OK`, primeiro salto 172.16.0.1. **Prova:** a LAN alcança o gateway e, através dele, a rede externa. Imagem: `04_teste1_conectividade.png`.
 
 ## 2. Tradução de endereço (NAT)
 
 Na Pi, em dois terminais: `tcpdump -ni ue1 tcp port 80` e `tcpdump -ni ue0 tcp port 80`. No host LAN: `curl -sI http://example.com`. Depois, na Pi: `pfctl -ss | grep :80`.
 
-Esperado: em `ue1` a origem é 172.16.0.10; em `ue0` a mesma conexão (mesmo `seq`) sai com o IP da WAN e outra porta; o estado mostra `IP_WAN:porta (172.16.0.10:porta) -> destino`. **Prova:** a origem privada é traduzida. Imagem: `05_teste2_nat.png`.
+Esperado: em `ue1` a origem é 172.16.10.111; em `ue0` a mesma conexão (mesmo `seq`) sai com o IP da WAN e outra porta; o estado mostra `IP_WAN:porta (172.16.10.111:porta) -> destino`. **Prova:** a origem privada é traduzida. Imagem: `05_teste2_nat.png`.
 
 ## 3. Isolamento de segmento
 
 1. Pi: `pfctl -vs rules | grep -A1 "block drop in on ue0 all"` (anotar `Packets`).
 2. LAN: `nc -lk 8080`.
-3. WAN: `ping -c3 172.16.0.10` (falha); `sudo ip route add 172.16.0.0/16 via IP_WAN_DA_PI`; repetir o ping e rodar `nc -vz -w3 172.16.0.10 8080`; depois `sudo ip route del 172.16.0.0/16`.
+3. WAN: `ping -c3 172.16.10.111` (falha); `sudo ip route add 172.16.0.0/16 via IP_WAN_DA_PI`; repetir o ping e rodar `nc -vz -w3 172.16.10.111 8080`; depois `sudo ip route del 172.16.0.0/16`.
 4. Pi: repetir o passo 1.
 
 Esperado: ping 100% de perda, `nc` com timeout, nada chega ao servidor da LAN e o contador aumenta (878 para 884 na execução registrada). Também: da WAN, a porta 22 abre (SSH liberado) e 53, 443, 8080 expiram. **Prova:** o NAT sozinho não protege; quem barra a entrada é o `block in on ue0 all`. Imagem: `09_teste3_isolamento.png`.
 
 ## 4. DHCP, IP fixo e leases
 
-- LAN: renovar o DHCP três vezes e conferir `ip -4 addr`, `ip route show default` e `resolvectl dns`. Esperado: sempre `172.16.0.10`, gateway 172.16.0.1, DNS 164.41.101.4 e 164.41.101.11.
+- LAN: renovar o DHCP três vezes e conferir `ip -4 addr`, `ip route show default` e `resolvectl dns`. Esperado: sempre `172.16.10.111`, gateway 172.16.0.1, DNS 164.41.101.4 e 164.41.101.11.
 - Pi, leases: `cat /var/db/dnsmasq.leases` (formato `validade MAC IP nome`).
 - Pi, log: `grep -E "DHCP(DISCOVER|OFFER|REQUEST|ACK)" /var/log/dnsmasq.log | tail`.
 
@@ -68,7 +68,7 @@ Esperado: ping 100% de perda, `nc` com timeout, nada chega ao servidor da LAN e 
 3. Pi, durante a conexão: `pfctl -ss | grep 8080`.
 4. Encerrar: `Ctrl+C` no `nc`; no telnet, `Ctrl+]` e `quit`.
 
-Esperado: o texto digitado em um lado aparece no outro e o estado mostra `172.16.0.10:8080 (IP_WAN:80) <- origem  ESTABLISHED`. **Prova:** a porta 80 da WAN chega à 8080 do host da LAN. Imagem: `10_teste5_dnat.png`.
+Esperado: o texto digitado em um lado aparece no outro e o estado mostra `172.16.10.111:8080 (IP_WAN:80) <- origem  ESTABLISHED`. **Prova:** a porta 80 da WAN chega à 8080 do host da LAN. Imagem: `10_teste5_dnat.png`.
 
 ## 6. Bloqueio de ping para fora da LAN
 
@@ -76,7 +76,7 @@ Esperado: o texto digitado em um lado aparece no outro e o estado mostra `172.16
 2. LAN: `ping -c3 172.16.0.1` (responde); `ping -c3 8.8.8.8` (100% de perda); `curl -sI http://example.com` (continua funcionando).
 3. Pi: `pfctl -vs rules | grep -A1 "icmp-type echoreq"` (contador da regra).
 
-Esperado: no `pflog0` aparece `block in on ue1: 172.16.0.10 > 8.8.8.8: ICMP echo request`. **Prova:** só o ICMP echo para fora da LAN é barrado; o gateway e os demais protocolos funcionam. Imagem: `07_teste6_bloqueio_ping.png`.
+Esperado: no `pflog0` aparece `block in on ue1: 172.16.10.111 > 8.8.8.8: ICMP echo request`. **Prova:** só o ICMP echo para fora da LAN é barrado; o gateway e os demais protocolos funcionam. Imagem: `07_teste6_bloqueio_ping.png`.
 
 ## 7. Serviços: parar e iniciar
 

@@ -11,7 +11,7 @@ No [simulador](index.html):
 
 Use **Executar** para rodar no painel destacado.
 
-IPs das evidências: Pi WAN `192.168.1.31`, LAN `172.16.0.10`, WAN host `192.168.1.17`.
+IPs das evidências: Pi WAN `192.168.1.31`, LAN `172.16.10.111`, WAN host `192.168.1.17`.
 
 O texto completo de cada passo vive em [`js/guide.js`](js/guide.js) (fonte do painel). Resumo por etapa:
 

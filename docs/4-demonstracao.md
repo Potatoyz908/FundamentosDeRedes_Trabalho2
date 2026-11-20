@@ -56,10 +56,10 @@ Relatos de outros grupos: o professor pede mudanças **ao vivo**, depois da demo
 
 **a) Bloquear um host da LAN (cortar o acesso dele para fora).** Na Pi:
 ```sh
-(cat /etc/pf.conf; echo 'block drop log quick on ue1 inet from 172.16.0.10 to ! 172.16.0.0/16') | pfctl -f -
-pfctl -k 172.16.0.10                      # derruba as conexões abertas dele
+(cat /etc/pf.conf; echo 'block drop log quick on ue1 inet from 172.16.10.111 to ! 172.16.0.0/16') | pfctl -f -
+pfctl -k 172.16.10.111                      # derruba as conexões abertas dele
 ```
-No host: `curl -sI -m5 http://104.20.23.154 -H "Host: example.com"` passa a expirar; `ping 172.16.0.1` ainda responde (o destino está dentro da LAN, fora do alcance da regra). Na Pi: `tcpdump -n -e -ttt -i pflog0` mostra o bloqueio, e `pfctl -vs rules | grep -A1 "172.16.0.10"` mostra o contador. Para bloquear **tudo** do host, trocar `to ! 172.16.0.0/16` por `to any`.
+No host: `curl -sI -m5 http://104.20.23.154 -H "Host: example.com"` passa a expirar; `ping 172.16.0.1` ainda responde (o destino está dentro da LAN, fora do alcance da regra). Na Pi: `tcpdump -n -e -ttt -i pflog0` mostra o bloqueio, e `pfctl -vs rules | grep -A1 "172.16.10.111"` mostra o contador. Para bloquear **tudo** do host, trocar `to ! 172.16.0.0/16` por `to any`.
 
 **b) Bloquear um IP de destino (um site ou servidor).**
 ```sh
@@ -77,7 +77,7 @@ No host: `curl`/`nc -vz 104.20.23.154 80` expira, e outros destinos continuam fu
 "Cliente da WLAN" = outro computador no Wi-Fi da rede de acesso (192.168.X.W). Duas direções:
 
 **LAN → WLAN (já funciona por TCP/UDP).** O NAT troca a origem pelo IP da WAN da Pi.
-- WLAN: `nc -lk 9000`. LAN: `echo oi | nc 192.168.X.W 9000`. Na Pi: `pfctl -ss | grep 9000` (estado com a tradução 172.16.0.10 → IP da WAN).
+- WLAN: `nc -lk 9000`. LAN: `echo oi | nc 192.168.X.W 9000`. Na Pi: `pfctl -ss | grep 9000` (estado com a tradução 172.16.10.111 → IP da WAN).
 - **Ping LAN → WLAN falha, e é o esperado:** o requisito do enunciado é impedir ping para fora do segmento, e a WLAN está fora. Se o professor exigir o ping, abrir uma exceção **antes** da regra de bloqueio (`ee /etc/pf.conf`, inserir logo acima da linha `REQUISITO ENUNCIADO`):
   ```
   pass in quick on $lan_if inet proto icmp from $rede_lan to 192.168.X.W icmp-type echoreq keep state
@@ -91,17 +91,17 @@ No host: `curl`/`nc -vz 104.20.23.154 80` expira, e outros destinos continuam fu
    ```
 2. No computador da WLAN, ensinar a rota para a LAN pela Pi (senão o pacote vai para o roteador de casa): Linux `sudo ip route add 172.16.0.0/16 via IP_WAN_DA_PI`; Windows `route add 172.16.0.0 mask 255.255.0.0 IP_WAN_DA_PI`.
 
-Teste: da WLAN, `ping 172.16.0.10` e `nc 172.16.0.10 8080` (com `nc -lk 8080` na LAN; o firewall do host da LAN precisa liberar). A resposta volta pela Pi porque o host da LAN usa a Pi como gateway. Desfazer: `pfctl -f /etc/pf.conf` e `sudo ip route del 172.16.0.0/16` na WLAN. **Explicar:** o ICMP bloqueado é só LAN → fora; WLAN → LAN entra como tráfego novo e precisa de regra e de rota.
+Teste: da WLAN, `ping 172.16.10.111` e `nc 172.16.10.111 8080` (com `nc -lk 8080` na LAN; o firewall do host da LAN precisa liberar). A resposta volta pela Pi porque o host da LAN usa a Pi como gateway. Desfazer: `pfctl -f /etc/pf.conf` e `sudo ip route del 172.16.0.0/16` na WLAN. **Explicar:** o ICMP bloqueado é só LAN → fora; WLAN → LAN entra como tráfego novo e precisa de regra e de rota.
 
 ### P3. "Mude o IP de um dos computadores"
 
-**a) Mudar o IP reservado do host de testes (de 172.16.0.10 para 172.16.0.20).** O IP aparece em dois arquivos: a reserva do DHCP e a macro do DNAT.
+**a) Mudar o IP reservado do host de testes (de 172.16.10.111 para 172.16.0.20).** O IP aparece em dois arquivos: a reserva do DHCP e a macro do DNAT.
 ```sh
 cp /usr/local/etc/dnsmasq.conf /usr/local/etc/dnsmasq.conf.bak ; cp /etc/pf.conf /etc/pf.conf.bak
 ee /usr/local/etc/dnsmasq.conf        # dhcp-host=MAC,host-avaliacao,172.16.0.20,infinite
 ee /etc/pf.conf                       # host_alvo = "172.16.0.20"
 dnsmasq --test -C /usr/local/etc/dnsmasq.conf && pfctl -nf /etc/pf.conf
-service dnsmasq stop ; sed -i '' '/172.16.0.10/d' /var/db/dnsmasq.leases ; service dnsmasq start
+service dnsmasq stop ; sed -i '' '/172.16.10.111/d' /var/db/dnsmasq.leases ; service dnsmasq start
 pfctl -f /etc/pf.conf
 ```
 No host, **derrubar e subir a interface** (a lease reservada é `infinite`, então o cliente não renova sozinho): `nmcli connection down X && nmcli connection up X` (Windows: `ipconfig /release` e `/renew`). Deve receber 172.16.0.20; conferir com `cat /var/db/dnsmasq.leases` e, para o DNAT, `nc -lk 8080` no host e `telnet IP_WAN 80` na WLAN. Voltar ao original com os `.bak` e repetir o procedimento.
@@ -114,7 +114,7 @@ No host, **derrubar e subir a interface** (a lease reservada é `infinite`, ent�
 
 | Pedido | Como cortar | Como restaurar | O que explicar |
 | --- | --- | --- | --- |
-| Cortar um cliente da LAN | regra do item P1(a) + `pfctl -k 172.16.0.10` | `pfctl -f /etc/pf.conf` | bloqueio com `quick` e derrubada dos estados |
+| Cortar um cliente da LAN | regra do item P1(a) + `pfctl -k 172.16.10.111` | `pfctl -f /etc/pf.conf` | bloqueio com `quick` e derrubada dos estados |
 | Cortar a internet de todos | `pfctl -F nat ; pfctl -F states` (remove o NAT; os clientes ainda pingam o gateway) | `pfctl -f /etc/pf.conf` | sem NAT, a origem privada sai pela WAN e o roteador de acesso descarta |
 | Cortar a saída da Pi (WAN) | `ifconfig ue0 down` (ou puxar o cabo da WAN) | `ifconfig ue0 up ; service dhclient restart ue0` (testado: volta com `DHCPACK`) | sem WAN não há rota default |
 | Cortar o DHCP | `service dnsmasq stop` | `service dnsmasq start` | quem já tem IP continua; quem chega novo não recebe |
@@ -169,13 +169,13 @@ Repetir o ensaio com o grupo antes do dia, trocando quem digita: o objetivo agor
 
 | Pergunta | Resposta curta |
 | --- | --- |
-| Diferença entre NAT e DNAT? | NAT troca a origem (LAN para WAN); DNAT (`rdr`) troca o destino (porta 80 da WAN para 172.16.0.10:8080). |
+| Diferença entre NAT e DNAT? | NAT troca a origem (LAN para WAN); DNAT (`rdr`) troca o destino (porta 80 da WAN para 172.16.10.111:8080). |
 | Por que `(ue0)` entre parênteses? | O `pf` relê o IP da interface; se o DHCP da WAN mudar, a regra acompanha. |
 | Por que o NAT/rdr vem antes do filtro? | A tradução ocorre primeiro; o filtro vê o destino já traduzido (por isso `tagged`). |
 | Qual regra vale no filtro? | A última que casa, exceto `quick` (vale a primeira). A do ping é `quick`. |
 | Como o DHCP funciona? | DORA: Discover, Offer, Request, Ack, em UDP 67/68, com broadcast no início. |
 | Onde ficam as leases? | `/var/db/dnsmasq.leases` e `/var/log/dnsmasq.log`. |
-| Como o IP fica fixo? | `dhcp-host=MAC,nome,172.16.0.10`. |
+| Como o IP fica fixo? | `dhcp-host=MAC,nome,172.16.10.111`. |
 | Por que `port=0` no dnsmasq? | Desliga o DNS dele; só DHCP. O DNS vem das opções entregues. |
 | Como habilitou o roteamento? | `gateway_enable="YES"` (sysctl `net.inet.ip.forwarding=1`). |
 | O que é o `pflog0`? | Interface que recebe cópia dos pacotes de regras com `log`; lida com `tcpdump -i pflog0`. |
