@@ -90,13 +90,13 @@ Editar no repositório, validar (`pfctl -nf`, `dnsmasq --test`, `sh -n`), copiar
 
 ## 10. Problemas comuns
 
-| Sintoma | O que verificar |
-| --- | --- |
-| Host da LAN não recebe IP | Cabo na `ue1`; `service dnsmasq status`; `interface=` com o nome certo; `tail /var/log/dnsmasq.log` |
-| Recebe IP, mas não navega | `sysctl net.inet.ip.forwarding` = 1; `pfctl -sn`; a WAN da Pi tem internet? (`ping 8.8.8.8` na Pi) |
-| Navega por IP, mas não por nome | Os DNS 164.41.101.4/.11 só respondem na rede da UnB; fora dela, testar por IP |
-| DNAT não chega | `nc -lk 8080` rodando no host; firewall do host liberando 8080; host com a Pi como gateway |
-| Ping da LAN ainda sai | Estado antigo na tabela: repetir o ping; conferir `pfctl -sr \| grep icmp` |
-| `pfctl -e` congela o SSH | Normal em sessão remota; reiniciar a Pi |
-| Interface `ue1` não aparece | Adaptador USB não reconhecido (`dmesg \| tail`); trocar a porta USB |
+| Sintoma                                    | O que verificar                                                                                                            |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Host da LAN não recebe IP                  | Cabo na `ue1`; `service dnsmasq status`; `interface=` com o nome certo; `tail /var/log/dnsmasq.log`                        |
+| Recebe IP, mas não navega                  | `sysctl net.inet.ip.forwarding` = 1; `pfctl -sn`; a WAN da Pi tem internet? (`ping 192.168.2.241` na Pi)                   |
+| Navega por IP, mas não por nome            | Os DNS 164.41.101.4/.11 só respondem na rede da UnB; fora dela, testar por IP                                              |
+| DNAT não chega                             | `nc -lk 8080` rodando no host; firewall do host liberando 8080; host com a Pi como gateway                                 |
+| Ping da LAN ainda sai                      | Estado antigo na tabela: repetir o ping; conferir `pfctl -sr \| grep icmp`                                                 |
+| `pfctl -e` congela o SSH                   | Normal em sessão remota; reiniciar a Pi                                                                                    |
+| Interface `ue1` não aparece                | Adaptador USB não reconhecido (`dmesg \| tail`); trocar a porta USB                                                        |
 | Rota default do notebook com métrica 20100 | O NetworkManager penaliza a interface sem internet detectada; nos testes, usar `-I enp44s0` (ping) ou `--interface` (curl) |

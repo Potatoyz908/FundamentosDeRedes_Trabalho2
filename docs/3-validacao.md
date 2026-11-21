@@ -31,9 +31,9 @@ No host LAN:
 
 ```sh
 ip -4 addr show ; ip route show default
-ping -c3 172.16.0.1
+ping 172.16.0.1
 curl -sI http://unb.br| head -1
-traceroute -n 8.8.8.8
+traceroute -n 192.168.2.241
 ```
 
 Esperado: 172.16.10.111/16, default via 172.16.0.1, ping respondido, `HTTP/1.1 200 OK`, primeiro salto 172.16.0.1. **Prova:** a LAN alcança o gateway e, através dele, a rede externa. Imagem: `04_teste1_conectividade.png`.
@@ -48,7 +48,7 @@ Esperado: em `ue1` a origem é 172.16.10.111; em `ue0` a mesma conexão (mesmo `
 
 1. Pi: `pfctl -vs rules | grep -A1 "block drop in on ue0 all"` (anotar `Packets`).
 2. LAN: `nc -lk 8080`.
-3. WAN: `ping -c3 172.16.10.111` (falha); `sudo ip route add 172.16.0.0/16 via IP_WAN_DA_PI`; repetir o ping e rodar `nc -vz -w3 172.16.10.111 8080`; depois `sudo ip route del 172.16.0.0/16`.
+3. WAN: `ping 172.16.10.111` (falha); `sudo ip route add 172.16.0.0/16 via IP_WAN_DA_PI`; repetir o ping e rodar `nc -vz -w3 172.16.10.111 8080`; depois `sudo ip route del 172.16.0.0/16`.
 4. Pi: repetir o passo 1.
 
 Esperado: ping 100% de perda, `nc` com timeout, nada chega ao servidor da LAN e o contador aumenta (878 para 884 na execução registrada). Também: da WAN, a porta 22 abre (SSH liberado) e 53, 443, 8080 expiram. **Prova:** o NAT sozinho não protege; quem barra a entrada é o `block in on ue0 all`. Imagem: `09_teste3_isolamento.png`.
@@ -73,10 +73,10 @@ Esperado: o texto digitado em um lado aparece no outro e o estado mostra `172.16
 ## 6. Bloqueio de ping para fora da LAN
 
 1. Pi: `tcpdump -n -e -ttt -i pflog0` (se faltar: `service pflog onestart`).
-2. LAN: `ping -c3 172.16.0.1` (responde); `ping -c3 8.8.8.8` (100% de perda); `curl -sI http://unb.br` (continua funcionando).
+2. LAN: `ping 172.16.0.1` (responde); `ping 192.168.2.241` (100% de perda); `curl -sI http://unb.br` (continua funcionando).
 3. Pi: `pfctl -vs rules | grep -A1 "icmp-type echoreq"` (contador da regra).
 
-Esperado: no `pflog0` aparece `block in on ue1: 172.16.10.111 > 8.8.8.8: ICMP echo request`. **Prova:** só o ICMP echo para fora da LAN é barrado; o gateway e os demais protocolos funcionam. Imagem: `07_teste6_bloqueio_ping.png`.
+Esperado: no `pflog0` aparece `block in on ue1: 172.16.10.111 > 192.168.2.241: ICMP echo request`. **Prova:** só o ICMP echo para fora da LAN é barrado; o gateway e os demais protocolos funcionam. Imagem: `07_teste6_bloqueio_ping.png`.
 
 ## 7. Serviços: parar e iniciar
 

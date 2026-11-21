@@ -27,7 +27,7 @@ A demonstração vale 70% da nota. Dois operadores: **A** fica na Pi (dois termi
 | D4 NAT              | A + B       | `tcpdump` em `ue1` e `ue0` + `curl`; `pfctl -ss`                                                 | A origem privada vira o IP da WAN                      |
 | D5 Isolamento       | WAN + A     | Rota forçada, ping e `nc -vz`; contador do `block ... ue0`                                       | NAT não é firewall; o bloqueio da WAN protege          |
 | D6 DNAT             | B + WAN + A | `nc -lk 8080` na LAN; `telnet IP_WAN 80` na WAN; `pfctl -ss \| grep 8080`                        | Porta 80 da WAN chega à 8080 da LAN                    |
-| D7 Bloqueio de ping | B + A       | `ping 172.16.0.1` ok, `ping 8.8.8.8` falha; `tcpdump -i pflog0`                                  | Só o ICMP echo para fora da LAN é barrado              |
+| D7 Bloqueio de ping | B + A       | `ping 172.16.0.1` ok, `ping 192.168.2.241` falha; `tcpdump -i pflog0`                            | Só o ICMP echo para fora da LAN é barrado              |
 | Serviços            | A           | `service dnsmasq stop` e `start`                                                                 | Controle do serviço e porta 67                         |
 
 Os comandos exatos estão em [3-validacao.md](3-validacao.md). Pedidos improvisados pelo professor (bloquear IP, LAN ↔ WLAN, mudar IP, cortar conexão) estão na seção seguinte.

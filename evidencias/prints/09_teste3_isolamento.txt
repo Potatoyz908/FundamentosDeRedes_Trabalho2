@@ -2,7 +2,7 @@
 $ pfctl -vs rules | grep -A1 "block drop in on ue0 all" | tail -1
   [ Evaluations: 32252     Packets: 878       Bytes: 240815      States: 0     ]
 # Host WAN (namespace wan, 192.168.1.17), rota 172.16.0.0/16 via 192.168.1.31
-$ sudo -n ip netns exec wan sh -c "ping -c3 -W2 172.16.0.10; nc -vz -w3 172.16.0.10 8080; echo nc_rc=$?"
+$ sudo -n ip netns exec wan sh -c "ping -W2 172.16.0.10; nc -vz -w3 172.16.0.10 8080; echo nc_rc=$?"
 PING 172.16.0.10 (172.16.0.10) 56(84) bytes of data.
 
 --- 172.16.0.10 ping statistics ---

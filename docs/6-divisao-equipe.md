@@ -123,7 +123,7 @@ pfctl -ss | grep :80
 pfctl -vs rules | grep -A1 "block drop in on ue0 all"   # contador
 ```
 
-No host: `ping -c3 172.16.0.1`, `curl -sI http://unb.br`, `traceroute -n 8.8.8.8`.
+No host: `ping 172.16.0.1`, `curl -sI http://unb.br`, `traceroute -n 192.168.2.241`.
 
 **Se o professor pedir**
 
@@ -169,7 +169,7 @@ Para sair: `Ctrl+C` no `nc`; no telnet, `Ctrl+]` e `quit`.
 **Se o professor pedir**
 
 - "Mostre o DNAT": servidor `nc -lk 8080` na LAN, `telnet` na WAN, uma frase em cada sentido, `pfctl -ss | grep 8080` mostrando `ESTABLISHED`.
-- "Mostre o bloqueio de ping": `ping 172.16.0.1` responde, `ping 8.8.8.8` perde tudo, `pflog0` registra, `curl` continua funcionando.
+- "Mostre o bloqueio de ping": `ping 172.16.0.1` responde, `ping 192.168.2.241` perde tudo, `pflog0` registra, `curl` continua funcionando.
 - "Libere o ping": comentar a regra `block ... icmp-type echoreq`, `pfctl -nf` e `pfctl -f /etc/pf.conf`; repetir o ping de um host novo (estados antigos podem manter o ping aberto). Restaurar depois.
 - "Faça a LAN falar com a WLAN": LAN → WLAN por TCP já funciona pelo NAT (`nc -lk 9000` na WLAN, `nc IP 9000` na LAN, `pfctl -ss | grep 9000`); o ping LAN → WLAN é barrado pelo requisito e só passa com uma exceção `pass in quick ... to IP_WLAN` colocada **acima** da regra do ICMP.
 - "Faça a WLAN falar com a LAN": regra `pass in on ue0 inet from IP_WLAN to 172.16.0.0/16 keep state` (no fim do arquivo vale) e rota `172.16.0.0/16 via IP_WAN_DA_PI` no computador da WLAN.

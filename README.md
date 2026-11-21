@@ -1,7 +1,8 @@
 # Trabalho 02 - Camada de Rede: NAT, DHCP e DNAT
 
 **Disciplina:** Fundamentos de Redes de Computadores  
-**Professor:** Tiago Alves
+**Professor:** Tiago Alves  
+**Repositório:** [github.com/Potatoyz908/FundamentosDeRedes_Trabalho2](https://github.com/Potatoyz908/FundamentosDeRedes_Trabalho2)
 
 Roteador FreeBSD em Raspberry Pi que liga uma rede de acesso (WAN) a uma LAN privada 172.16.0.0/16, com NAT, servidor DHCP com IP reservado, DNAT da porta 80 para a 8080 de um host da LAN, isolamento da WAN e bloqueio de ping para fora da LAN.
 
@@ -98,13 +99,13 @@ Roteiro detalhado, com comandos para Linux e Windows, em [docs/3-validacao.md](d
 
 | Teste            | Onde          | Comando                                                                     | Esperado                                    |
 | ---------------- | ------------- | --------------------------------------------------------------------------- | ------------------------------------------- |
-| Conectividade    | host LAN      | `ping 172.16.0.1`; `curl -I http://unb.br`; `traceroute -n 8.8.8.8`         | responde; primeiro salto 172.16.0.1         |
+| Conectividade    | host LAN      | `ping 172.16.0.1`; `curl -I http://unb.br`; `traceroute -n 192.168.2.241`   | responde; primeiro salto 172.16.0.1         |
 | NAT              | Pi            | `tcpdump -ni ue1 tcp port 80` e `tcpdump -ni ue0 tcp port 80` + `pfctl -ss` | origem 172.16.0.10 na LAN; IP da WAN na WAN |
 | Isolamento       | WAN           | ping e `nc -vz` direto à LAN, com rota forçada via Pi                       | falha; contador do `block ... ue0` sobe     |
 | DHCP e IP fixo   | host LAN      | renovar o DHCP várias vezes                                                 | sempre 172.16.0.10                          |
 | Leases em log    | Pi            | `cat /var/db/dnsmasq.leases`; `grep DHCP /var/log/dnsmasq.log`              | MAC, IP e mensagens DORA                    |
 | DNAT             | LAN e WAN     | `nc -lk 8080` na LAN; `telnet 192.168.2.241 80` na WAN                      | texto atravessa nos dois sentidos           |
-| Bloqueio de ping | host LAN / Pi | `ping 172.16.0.1` e `ping 8.8.8.8`; `tcpdump -n -e -i pflog0`               | gateway responde; externo 100% de perda     |
+| Bloqueio de ping | host LAN / Pi | `ping 172.16.0.1` e `ping 192.168.2.241`; `tcpdump -n -e -i pflog0`         | gateway responde; externo 100% de perda     |
 
 Resultado da validação de 14/11/2026 (todos os requisitos passaram; detalhes em [docs/5-auditoria.md](docs/5-auditoria.md)):
 

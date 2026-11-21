@@ -69,8 +69,8 @@ Para ver a requisição no `pflog0`, a regra do DNAT precisa de `log`: `pass in 
 pfctl -sr | grep echoreq
 tcpdump -n -e -ttt -i pflog0
 # cliente:
-ping -c3 172.16.0.1                           # responde
-ping -c3 8.8.8.8                              # 100% de perda
+ping 172.16.0.1                           # responde
+ping 192.168.2.241                              # 100% de perda
 curl -sI -m8 http://unb.br | head -1     # continua funcionando
 # Pi:
 pfctl -vs rules | grep -A1 echoreq            # o contador sobe
@@ -82,7 +82,7 @@ pfctl -vs rules | grep -A1 echoreq            # o contador sobe
 cp /etc/pf.conf /etc/pf.conf.bak-icmp
 sed -i '' 's/^block in quick log on \$lan_if inet proto icmp/#&/' /etc/pf.conf
 pfctl -nf /etc/pf.conf && pfctl -f /etc/pf.conf
-# cliente: ping -c3 8.8.8.8   (agora responde)
+# cliente: ping 192.168.2.241   (agora responde)
 
 # restaurar o requisito:
 cp /etc/pf.conf.bak-icmp /etc/pf.conf && pfctl -nf /etc/pf.conf && pfctl -f /etc/pf.conf
@@ -90,5 +90,5 @@ cp /etc/pf.conf.bak-icmp /etc/pf.conf && pfctl -nf /etc/pf.conf && pfctl -f /etc
 
 ## Problemas que tivemos
 
-- **Sem internet no cliente (Wi-Fi desligado):** o gateway entregue estava errado (era o IP do próprio cliente) e o DNS 164.41.101.x não responde fora da UnB. Em casa, usar `dhcp-option=option:dns-server,8.8.8.8,1.1.1.1`; no laboratório, o DNS do enunciado.
+- **Sem internet no cliente (Wi-Fi desligado):** o gateway entregue estava errado (era o IP do próprio cliente) e o DNS 164.41.101.x não responde fora da UnB. Em casa, usar `dhcp-option=option:dns-server,192.168.2.241,1.1.1.1`; no laboratório, o DNS do enunciado.
 - **A Pi chegou a ficar com o IP do cliente na `ue1`:** corrigir `ifconfig_ue1` no `rc.conf` para `inet 172.16.0.1 netmask 255.255.0.0`.
