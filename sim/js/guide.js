@@ -126,7 +126,7 @@ export const STEPS = [
     id: "d3-1",
     stage: "D3 · Conectividade",
     ctx: "lan",
-    cmd: "ping -c3 172.16.0.1",
+    cmd: "ping 172.16.0.1",
     title: "Alcance do gateway",
     why: "Primeiro teste de conectividade L3 na LAN. Também antecipa D7: ping ao gateway deve funcionar mesmo com bloqueio de echo para fora.",
     kurose:
@@ -150,12 +150,12 @@ export const STEPS = [
     id: "d3-3",
     stage: "D3 · Conectividade",
     ctx: "lan",
-    cmd: "traceroute -n 8.8.8.8",
+    cmd: "traceroute -n 192.168.2.241",
     title: "Caminho dos pacotes",
     why: "Mostra que o 1º salto é a Pi. Usa-se sem -I de propósito: -I seria ICMP echo, bloqueado em D7; traceroute clássico usa UDP + TTL.",
     kurose:
       "Cap. 4.4.3: traceroute envia sondas com TTL=1,2,3… O roteador que descarta por TTL esgotado devolve ICMP Time Exceeded (tipo 11). Assim a origem descobre cada salto. Quando a sonda chega ao destino (porta improvável), tipicamente vem Destination Unreachable — fim do traçado.",
-    flow: "TTL=1 → Pi (.1) responde. TTL=2 → gateway WAN (192.168.1.254), etc. Echo request para 8.8.8.8 continua bloqueado; este comando não depende dele.",
+    flow: "TTL=1 → Pi (.1) responde. TTL=2 → gateway WAN (192.168.1.254), etc. Echo request para 192.168.2.241 continua bloqueado; este comando não depende dele.",
     look: "1  172.16.0.1  … Narrar: “primeiro cruzamento = nosso roteador”.",
   },
   {
@@ -234,7 +234,7 @@ export const STEPS = [
     id: "d5-4",
     stage: "D5 · Isolamento",
     ctx: "wan",
-    cmd: "ping -c3 172.16.10.111 ; nc -vz -w3 172.16.10.111 8080",
+    cmd: "ping 172.16.10.111 ; nc -vz -w3 172.16.10.111 8080",
     title: "Ataque simulado",
     why: "Momento da tese: NAT não protege; o block in on ue0 all + block-policy drop isola (timeout, não “connection refused”).",
     kurose:
@@ -318,7 +318,7 @@ export const STEPS = [
     id: "d7-2",
     stage: "D7 · Bloqueio de ping (sua área)",
     ctx: "lan",
-    cmd: "ping -c3 172.16.0.1",
+    cmd: "ping 172.16.0.1",
     title: "Ping ao gateway (deve funcionar)",
     why: "Controle negativo da regra: destino dentro da LAN não casa com to ! rede_lan.",
     kurose:
@@ -330,12 +330,12 @@ export const STEPS = [
     id: "d7-3",
     stage: "D7 · Bloqueio de ping (sua área)",
     ctx: "lan",
-    cmd: "ping -c3 8.8.8.8",
+    cmd: "ping 192.168.2.241",
     title: "Ping para fora (deve falhar)",
     why: "Requisito do enunciado. quick garante precedência sobre pass posteriores; log alimenta pflog0.",
     kurose:
       "Cap. 4.4.3: Echo Request tipo 8. Cap. 8.9: políticas podem bloquear tipos ICMP para dificultar mapeamento (ping sweep). O datagrama nunca sai para a Internet: o block acontece na entrada de ue1, no caminho de saída da LAN.",
-    flow: ".10 → 8.8.8.8 echoreq → block quick log on ue1 → pflog0 registra → 100% loss.",
+    flow: ".10 → 192.168.2.241 echoreq → block quick log on ue1 → pflog0 registra → 100% loss.",
     look: "100% loss. No pi: linhas block in on ue1 … ICMP echo request.",
   },
   {

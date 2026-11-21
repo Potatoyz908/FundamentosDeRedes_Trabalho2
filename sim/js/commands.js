@@ -20,13 +20,13 @@ D0  [pi]  ifconfig ue0 ; ifconfig ue1 ; sysctl net.inet.ip.forwarding
 D1  [pi]  netstat -rn -f inet ; pfctl -sn ; pfctl -sr
 D2  [lan] dhclient ; ip -4 addr
       [pi]  cat /var/db/dnsmasq.leases
-D3  [lan] ping -c3 172.16.0.1 ; curl -sI http://unb.br ; traceroute -n 8.8.8.8
+D3  [lan] ping 172.16.0.1 ; curl -sI http://unb.br ; traceroute -n 192.168.2.241
 D4  [pi]  tcpdump -ni ue1 tcp port 80
       [lan] curl -sI http://unb.br
       [pi]  pfctl -ss | grep :80
 D5  [wan] rota forçada + ping/nc à LAN ; [pi] contador block ue0
 D6  [lan] nc -lk 8080 ; [wan] telnet 192.168.1.31 80 ; [pi] pfctl -ss | grep 8080
-D7  [lan] ping gateway ok / 8.8.8.8 falha ; [pi] pflog + contador icmp`;
+D7  [lan] ping gateway ok / 192.168.2.241 falha ; [pi] pflog + contador icmp`;
 
 const HELP = `Comandos meta (em qualquer painel):
   demo             roteiro D0–D7
@@ -312,7 +312,7 @@ function tcpdump(args) {
   const drained = drainCapture(iface === "pflog0" ? "pflog0" : iface);
   const tip =
     iface === "pflog0"
-      ? `(captura pflog0 ativa — rode ping 8.8.8.8 na LAN; Ctrl+C simulado: digite 'tcpdump stop')`
+      ? `(captura pflog0 ativa — rode ping 192.168.2.241 na LAN; Ctrl+C simulado: digite 'tcpdump stop')`
       : `(captura ${iface} ativa — rode curl na LAN; digite 'tcpdump stop' para encerrar)`;
   if (drained) return ok(`${drained}\ntcpdump: ${tip}`);
   return ok(`tcpdump: listening on ${iface}, link-type NULL\n${tip}`);
@@ -534,17 +534,17 @@ function handleLan(cmd) {
 3 packets transmitted, 3 received, 0% packet loss, time 2069ms
 rtt min/avg/max/mdev = 0.351/0.479/0.632/0.116 ms`);
     }
-    if (target === "8.8.8.8" || target.startsWith("8.8.")) {
+    if (target === "192.168.2.241" || target.startsWith("8.8.")) {
       state.icmpPackets += 3;
       state.icmpEvals += 3;
       for (let i = 1; i <= 3; i++) {
         pushCapture(
-          ` 00:00:0${i - 1}.000000 rule 0/0(match): block in on ue1: ${CFG.ipLanHost} > 8.8.8.8: ICMP echo request, id 58122, seq ${i}, length 64`,
+          ` 00:00:0${i - 1}.000000 rule 0/0(match): block in on ue1: ${CFG.ipLanHost} > 192.168.2.241: ICMP echo request, id 58122, seq ${i}, length 64`,
         );
       }
-      return ok(`PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+      return ok(`PING 192.168.2.241 (192.168.2.241) 56(84) bytes of data.
 
---- 8.8.8.8 ping statistics ---
+--- 192.168.2.241 ping statistics ---
 3 packets transmitted, 0 received, 100% packet loss, time 2045ms`);
     }
     return err(`ping: destino não simulado: ${target}`);
@@ -569,7 +569,7 @@ rtt min/avg/max/mdev = 0.351/0.479/0.632/0.116 ms`);
   }
 
   if (bin === "traceroute" || bin === "tracert") {
-    return ok(`traceroute to 8.8.8.8 (8.8.8.8), 3 hops max, 60 byte packets
+    return ok(`traceroute to 192.168.2.241 (192.168.2.241), 3 hops max, 60 byte packets
  1  ${CFG.ipLanGw}  0.720 ms  0.686 ms  0.679 ms
  2  ${CFG.gwWan}  1.408 ms  1.520 ms  1.768 ms
  3  172.20.0.1  5.382 ms  5.256 ms  5.491 ms`);
