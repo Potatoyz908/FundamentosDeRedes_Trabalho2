@@ -19,11 +19,11 @@ pass out on ue0 all
 == Teste 1 - Conectividade (host LAN)
 ip: 172.16.0.10/16 ; default via 172.16.0.1 proto dhcp
 ping 172.16.0.1: 3/3 recebidos
-curl -sI https://www.freebsd.org: HTTP/1.1 200 OK ; curl -sI http://unb.br: 200 OK
-traceroute -n 192.168.2.241: 1) 172.16.0.1  2) 192.168.1.254  3) * * *
+curl -sI https://www.freebsd.org: HTTP/1.1 200 OK ; curl -sI http://example.com: 200 OK
+traceroute -n 8.8.8.8: 1) 172.16.0.1  2) 192.168.1.254  3) * * *
 dig @164.41.101.4 e @164.41.101.11: timeout (servidores so alcancaveis na rede da UnB; ver limitacoes)
 
-== Teste 2 - NAT (tcpdump na Pi durante curl http://unb.br)
+== Teste 2 - NAT (tcpdump na Pi durante curl http://example.com)
 ue1 (LAN): 172.16.0.10.48026 > 104.20.23.154.80  [S]
 ue0 (WAN): 192.168.1.31.65239 > 104.20.23.154.80 [S]   (mesmo seq 1221352595)
 pfctl -ss: tcp 192.168.1.31:65239 (172.16.0.10:48026) -> 104.20.23.154:80
@@ -47,8 +47,8 @@ Handshake NAO completou: cliente e servidor eram a mesma maquina (a resposta 172
 fica local e nao volta pela Pi). Necessario 2o equipamento no lado WAN para fechar o teste.
 
 == Teste 6 - Bloqueio de ping
-ping 172.16.0.1: 0% perda ; ping 192.168.2.241 e 192.168.1.254: 100% perda ; curl HTTPS: funciona
-tcpdump -n -e -ttt -i pflog0: "rule 0/0(match): block in on ue1: 172.16.0.10 > 192.168.2.241: ICMP echo request" (x3)
+ping 172.16.0.1: 0% perda ; ping 8.8.8.8 e 192.168.1.254: 100% perda ; curl HTTPS: funciona
+tcpdump -n -e -ttt -i pflog0: "rule 0/0(match): block in on ue1: 172.16.0.10 > 8.8.8.8: ICMP echo request" (x3)
 contador da regra icmp: ver "pfctl -vs rules"
 
 == Servico dnsmasq
@@ -57,7 +57,7 @@ service dnsmasq start -> "dnsmasq is running as pid 2995." ; sockstat: udp4 *:67
 
 == Teste 3b - Isolamento com rota forcada (16:16) - namespace "wan" (ipvlan no Wi-Fi, 192.168.1.17)
 ip route add 172.16.0.0/16 via 192.168.1.31 (dentro do namespace wan)
-ping 172.16.0.10 : 3 enviados, 0 recebidos, 100% packet loss
+ping -c3 172.16.0.10 : 3 enviados, 0 recebidos, 100% packet loss
 nc -vz -w3 172.16.0.10 8080 (nc -lk 8080 ouvindo na LAN): "connect ... timed out" ; nada chegou ao servidor
 Pi: "block drop in on ue0 all"  Packets: 678 -> 725 (Bytes 186440 -> 197657)
 

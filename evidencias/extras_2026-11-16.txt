@@ -2,7 +2,7 @@ Pedidos extras do professor - execucao real em 16/11/2026 (Pi FreeBSD 15.1; WAN 
 Cliente "WLAN" simulado por namespace de rede (192.168.1.17, ipvlan no Wi-Fi). Antes: backup dos arquivos; depois de cada teste: regras (pfctl -sr) e NAT (pfctl -sn) identicos aos originais.
 
 == P1a Bloquear um host da LAN
-antes : curl http://104.20.23.154 (Host: unb.br) -> http=200
+antes : curl http://104.20.23.154 (Host: example.com) -> http=200
 regra : (cat /etc/pf.conf; echo 'block drop log quick on ue1 inet from 172.16.0.10 to ! 172.16.0.0/16') | pfctl -f -
         pfctl -k 172.16.0.10 -> "killed 288 states from 1 sources and 0 destinations"
 depois: curl -> http=000 ; ping 172.16.0.1 -> 2/2 (gateway continua respondendo)
@@ -23,7 +23,7 @@ LAN -> WLAN TCP: echo oi_da_LAN | nc 192.168.1.17 9000 -> servidor WLAN recebeu 
 LAN -> WLAN ping: 100% de perda (regra do ICMP, requisito)
 excecao (inserida acima da linha "# REQUISITO ENUNCIADO", pfctl -nf SINTAXE_OK):
   pass in quick on $lan_if inet proto icmp from $rede_lan to 192.168.1.17 icmp-type echoreq keep state
-  ping 192.168.1.17: 0% de perda ; ping 192.168.2.241: continua 100% de perda ; restaurar: REGRAS_IGUAIS
+  ping 192.168.1.17: 0% de perda ; ping 8.8.8.8: continua 100% de perda ; restaurar: REGRAS_IGUAIS
 WLAN -> LAN: rota no cliente WLAN (ip route replace 172.16.0.0/16 via 192.168.1.29)
   sem regra : nc -vz 172.16.0.10 8080 -> timed out ; ping -> 100% perda
   regra (no fim do arquivo): pass in on ue0 inet from 192.168.1.17 to 172.16.0.0/16 keep state
@@ -55,7 +55,7 @@ service dnsmasq stop/start: ver auditoria_2026-11-14.txt
 
 == P5 Outros
 bloquear porta 80 (block drop log quick on ue1 proto tcp from any to any port 80 + pfctl -F states): 80 -> timed out ; 443 -> succeeded ; restaurar: REGRAS_IGUAIS
-liberar o ping (sed 's/^block in quick log on/# &/' /etc/pf.conf | pfctl -f -): ping 192.168.2.241 -> 0% perda ; restaurar: volta a 100% perda
+liberar o ping (sed 's/^block in quick log on/# &/' /etc/pf.conf | pfctl -f -): ping 8.8.8.8 -> 0% perda ; restaurar: volta a 100% perda
 mudar a porta do DNAT (porta_servico = "9090", pfctl -nf OK, pfctl -f): rdr ... -> 172.16.0.10 port 9090 ; nc -lk 9090 recebeu "ola_porta_9090" da WLAN ; restaurar: REGRAS_IGUAIS
 
 == Outras observacoes
