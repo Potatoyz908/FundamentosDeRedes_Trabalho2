@@ -1,11 +1,12 @@
 # Trabalho 02 - Camada de Rede: NAT, DHCP e DNAT
 
 **Disciplina:** Fundamentos de Redes de Computadores  
-**Professor:** Tiago Alves  
+**Professor:** Tiago Alves
 
 Roteador FreeBSD em Raspberry Pi que liga uma rede de acesso (WAN) a uma LAN privada 172.16.0.0/16, com NAT, servidor DHCP com IP reservado, DNAT da porta 80 para a 8080 de um host da LAN, isolamento da WAN e bloqueio de ping para fora da LAN.
 
 ## 1. Integrantes
+
 - Davi Camilo Menezes (231011220)
 - Euller Júlio da Silva (231026714)
 - Giovani de Oliveira Teodoro Coelho (241032500)
@@ -41,33 +42,33 @@ referencias/               enunciado do trabalho
 
 ## 4. Aplicações demandadas na implementação da rede LAN
 
-| Aplicação | Função | Arquivo |
-| --- | --- | --- |
-| FreeBSD `rc` (`gateway_enable`) | Repasse IPv4 entre WAN e LAN; sobe os serviços no boot | `configs/rc.conf` |
-| `pf` (Packet Filter) | NAT, DNAT (`rdr`), isolamento da WAN e bloqueio de ping | `configs/pf.conf` |
-| `pflog` | Registro dos pacotes bloqueados em `pflog0` | `configs/rc.conf` |
-| `dnsmasq` 2.93 (só DHCP, `port=0`) | DHCP, reserva de IP por MAC e log das leases | `configs/dnsmasq.conf` |
-| `sshd` | Administração remota | `configs/rc.conf` |
-| `netcat`, `telnet`, `tcpdump`, `curl`, `traceroute` | Ferramentas de teste | clientes |
+| Aplicação                                           | Função                                                  | Arquivo                |
+| --------------------------------------------------- | ------------------------------------------------------- | ---------------------- |
+| FreeBSD `rc` (`gateway_enable`)                     | Repasse IPv4 entre WAN e LAN; sobe os serviços no boot  | `configs/rc.conf`      |
+| `pf` (Packet Filter)                                | NAT, DNAT (`rdr`), isolamento da WAN e bloqueio de ping | `configs/pf.conf`      |
+| `pflog`                                             | Registro dos pacotes bloqueados em `pflog0`             | `configs/rc.conf`      |
+| `dnsmasq` 2.93 (só DHCP, `port=0`)                  | DHCP, reserva de IP por MAC e log das leases            | `configs/dnsmasq.conf` |
+| `sshd`                                              | Administração remota                                    | `configs/rc.conf`      |
+| `netcat`, `telnet`, `tcpdump`, `curl`, `traceroute` | Ferramentas de teste                                    | clientes               |
 
 ![Topologia](docs/img/topologia.svg)
 
-| Item | Valor |
-| --- | --- |
-| WAN (`ue0`) | DHCP da rede de acesso (em casa 192.168.1.31/24); no laboratório IP fixo 192.168.X.Y (linhas comentadas em `rc.conf`) |
-| LAN (`ue1`) | 172.16.0.1/16 |
-| Faixa DHCP | 172.16.1.1 a 172.16.1.254, máscara 255.255.0.0, lease de 12 h |
-| Host de testes | 172.16.0.10 (reserva por MAC, lease infinita) |
-| DNS entregue | 164.41.101.4 e 164.41.101.11 |
-| DNAT | porta TCP 80 da WAN para 172.16.0.10 porta 8080 |
+| Item           | Valor                                                                                                                 |
+| -------------- | --------------------------------------------------------------------------------------------------------------------- |
+| WAN (`ue0`)    | DHCP da rede de acesso (em casa 192.168.1.31/24); no laboratório IP fixo 192.168.X.Y (linhas comentadas em `rc.conf`) |
+| LAN (`ue1`)    | 172.16.0.1/16                                                                                                         |
+| Faixa DHCP     | 172.16.1.1 a 172.16.1.254, máscara 255.255.0.0, lease de 12 h                                                         |
+| Host de testes | 172.16.0.10 (reserva por MAC, lease infinita)                                                                         |
+| DNS entregue   | 164.41.101.4 e 164.41.101.11                                                                                          |
+| DNAT           | porta TCP 80 da WAN para 172.16.0.10 porta 8080                                                                       |
 
 ## 5. Arquivos de configuração
 
-| Arquivo | Destino na Pi | O que faz |
-| --- | --- | --- |
-| `configs/rc.conf` | `/etc/rc.conf` | IP da WAN por DHCP, `172.16.0.1/16` na LAN, `gateway_enable="YES"`, liga `pf`, `pflog`, `dnsmasq` e `sshd` |
-| `configs/pf.conf` | `/etc/pf.conf` | `nat` e `rdr` com `tag`; `block in quick` do ICMP echo request da LAN para fora da LAN; `block in on ue0 all` com exceções (SSH, ping ao roteador, DHCP, tráfego marcado pelo DNAT) |
-| `configs/dnsmasq.conf` | `/usr/local/etc/dnsmasq.conf` | Só DHCP na `ue1`: faixa, gateway, DNS, `dhcp-host` (reserva), `dhcp-leasefile` e `log-dhcp` |
+| Arquivo                | Destino na Pi                 | O que faz                                                                                                                                                                           |
+| ---------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `configs/rc.conf`      | `/etc/rc.conf`                | IP da WAN por DHCP, `172.16.0.1/16` na LAN, `gateway_enable="YES"`, liga `pf`, `pflog`, `dnsmasq` e `sshd`                                                                          |
+| `configs/pf.conf`      | `/etc/pf.conf`                | `nat` e `rdr` com `tag`; `block in quick` do ICMP echo request da LAN para fora da LAN; `block in on ue0 all` com exceções (SSH, ping ao roteador, DHCP, tráfego marcado pelo DNAT) |
+| `configs/dnsmasq.conf` | `/usr/local/etc/dnsmasq.conf` | Só DHCP na `ue1`: faixa, gateway, DNS, `dhcp-host` (reserva), `dhcp-leasefile` e `log-dhcp`                                                                                         |
 
 A explicação linha a linha está em [docs/1-arquitetura.md](docs/1-arquitetura.md).
 
@@ -95,28 +96,28 @@ Passo a passo completo em [docs/2-instalacao.md](docs/2-instalacao.md). Resumo, 
 
 Roteiro detalhado, com comandos para Linux e Windows, em [docs/3-validacao.md](docs/3-validacao.md). Abrir dois terminais: um no host e outro com SSH na Pi.
 
-| Teste | Onde | Comando | Esperado |
-| --- | --- | --- | --- |
-| Conectividade | host LAN | `ping 172.16.0.1`; `curl -I http://example.com`; `traceroute -n 8.8.8.8` | responde; primeiro salto 172.16.0.1 |
-| NAT | Pi | `tcpdump -ni ue1 tcp port 80` e `tcpdump -ni ue0 tcp port 80` + `pfctl -ss` | origem 172.16.0.10 na LAN; IP da WAN na WAN |
-| Isolamento | WAN | ping e `nc -vz` direto à LAN, com rota forçada via Pi | falha; contador do `block ... ue0` sobe |
-| DHCP e IP fixo | host LAN | renovar o DHCP várias vezes | sempre 172.16.0.10 |
-| Leases em log | Pi | `cat /var/db/dnsmasq.leases`; `grep DHCP /var/log/dnsmasq.log` | MAC, IP e mensagens DORA |
-| DNAT | LAN e WAN | `nc -lk 8080` na LAN; `telnet IP_WAN 80` na WAN | texto atravessa nos dois sentidos |
-| Bloqueio de ping | host LAN / Pi | `ping 172.16.0.1` e `ping 8.8.8.8`; `tcpdump -n -e -i pflog0` | gateway responde; externo 100% de perda |
+| Teste            | Onde          | Comando                                                                     | Esperado                                    |
+| ---------------- | ------------- | --------------------------------------------------------------------------- | ------------------------------------------- |
+| Conectividade    | host LAN      | `ping 172.16.0.1`; `curl -I http://unb.br`; `traceroute -n 8.8.8.8`         | responde; primeiro salto 172.16.0.1         |
+| NAT              | Pi            | `tcpdump -ni ue1 tcp port 80` e `tcpdump -ni ue0 tcp port 80` + `pfctl -ss` | origem 172.16.0.10 na LAN; IP da WAN na WAN |
+| Isolamento       | WAN           | ping e `nc -vz` direto à LAN, com rota forçada via Pi                       | falha; contador do `block ... ue0` sobe     |
+| DHCP e IP fixo   | host LAN      | renovar o DHCP várias vezes                                                 | sempre 172.16.0.10                          |
+| Leases em log    | Pi            | `cat /var/db/dnsmasq.leases`; `grep DHCP /var/log/dnsmasq.log`              | MAC, IP e mensagens DORA                    |
+| DNAT             | LAN e WAN     | `nc -lk 8080` na LAN; `telnet 192.168.2.241 80` na WAN                      | texto atravessa nos dois sentidos           |
+| Bloqueio de ping | host LAN / Pi | `ping 172.16.0.1` e `ping 8.8.8.8`; `tcpdump -n -e -i pflog0`               | gateway responde; externo 100% de perda     |
 
 Resultado da validação de 14/11/2026 (todos os requisitos passaram; detalhes em [docs/5-auditoria.md](docs/5-auditoria.md)):
 
-| Imagem | Teste |
-| --- | --- |
+| Imagem                                                                                      | Teste                                          |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------- |
 | `evidencias/prints/01_pre_checagem_pi.png`, `02_regras_pf.png`, `03_validacao_arquivos.png` | estado do roteador, regras e arquivos sem erro |
-| `evidencias/prints/04_teste1_conectividade.png` | 1 Conectividade |
-| `evidencias/prints/05_teste2_nat.png` | 2 NAT |
-| `evidencias/prints/09_teste3_isolamento.png` | 3 Isolamento (rota forçada a partir da WAN) |
-| `evidencias/prints/06_teste4_dhcp.png` | 4 DHCP, IP fixo e leases |
-| `evidencias/prints/10_teste5_dnat.png` | 5 DNAT ponta a ponta |
-| `evidencias/prints/07_teste6_bloqueio_ping.png` | 6 Bloqueio de ping |
-| `evidencias/prints/08_servico_dnsmasq.png` | `service dnsmasq stop` e `start` |
+| `evidencias/prints/04_teste1_conectividade.png`                                             | 1 Conectividade                                |
+| `evidencias/prints/05_teste2_nat.png`                                                       | 2 NAT                                          |
+| `evidencias/prints/09_teste3_isolamento.png`                                                | 3 Isolamento (rota forçada a partir da WAN)    |
+| `evidencias/prints/06_teste4_dhcp.png`                                                      | 4 DHCP, IP fixo e leases                       |
+| `evidencias/prints/10_teste5_dnat.png`                                                      | 5 DNAT ponta a ponta                           |
+| `evidencias/prints/07_teste6_bloqueio_ping.png`                                             | 6 Bloqueio de ping                             |
+| `evidencias/prints/08_servico_dnsmasq.png`                                                  | `service dnsmasq stop` e `start`               |
 
 ![NAT](evidencias/prints/05_teste2_nat.png)
 ![Isolamento](evidencias/prints/09_teste3_isolamento.png)
@@ -152,6 +153,6 @@ Compress-Archive -Path README.md,configs,docs,evidencias,versoes.txt,referencias
 ## 10. Fontes
 
 - Enunciado do Trabalho 02 (`referencias/trabalho_02_v5.pdf`).
-- Wright, G. R.; Stevens, W. R. *TCP/IP Illustrated*, v. 2. Addison-Wesley, 1995.
-- Lucas, M. W. *Networking for System Administrators*. 2. ed. Tilted Windmill Press, 2025.
+- Wright, G. R.; Stevens, W. R. _TCP/IP Illustrated_, v. 2. Addison-Wesley, 1995.
+- Lucas, M. W. _Networking for System Administrators_. 2. ed. Tilted Windmill Press, 2025.
 - Páginas de manual `pf.conf(5)`, `rc.conf(5)` e `dnsmasq(8)`.

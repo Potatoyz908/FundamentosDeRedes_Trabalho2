@@ -31,7 +31,7 @@ nmcli connection down <conexao> && nmcli connection up <conexao>
 ip -4 addr show enp44s0                  # 172.16.10.111/16
 ip route                                 # default via 172.16.0.1
 resolvectl dns enp44s0                   # 164.41.101.4 164.41.101.11
-curl -sI http://example.com | head -1    # HTTP 200
+curl -sI http://unb.br | head -1    # HTTP 200
 ```
 
 ## 3. DHCP e logs (na Pi)
@@ -47,7 +47,7 @@ grep -E "DHCP(DISCOVER|OFFER|REQUEST|ACK)" /var/log/dnsmasq.log | tail
 tcpdump -ni ue1 tcp port 80     # origem 172.16.x.x
 tcpdump -ni ue0 tcp port 80     # origem = IP da WAN
 pfctl -ss | grep :80
-# cliente: curl -sI http://example.com
+# cliente: curl -sI http://unb.br
 ```
 
 ## 5. DNAT (porta 80 da WAN para 8080 do cliente)
@@ -71,7 +71,7 @@ tcpdump -n -e -ttt -i pflog0
 # cliente:
 ping -c3 172.16.0.1                           # responde
 ping -c3 8.8.8.8                              # 100% de perda
-curl -sI -m8 http://example.com | head -1     # continua funcionando
+curl -sI -m8 http://unb.br | head -1     # continua funcionando
 # Pi:
 pfctl -vs rules | grep -A1 echoreq            # o contador sobe
 ```

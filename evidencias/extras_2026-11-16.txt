@@ -2,7 +2,7 @@ Pedidos extras do professor - execucao real em 16/11/2026 (Pi FreeBSD 15.1; WAN 
 Cliente "WLAN" simulado por namespace de rede (192.168.1.17, ipvlan no Wi-Fi). Antes: backup dos arquivos; depois de cada teste: regras (pfctl -sr) e NAT (pfctl -sn) identicos aos originais.
 
 == P1a Bloquear um host da LAN
-antes : curl http://104.20.23.154 (Host: example.com) -> http=200
+antes : curl http://104.20.23.154 (Host: unb.br) -> http=200
 regra : (cat /etc/pf.conf; echo 'block drop log quick on ue1 inet from 172.16.0.10 to ! 172.16.0.0/16') | pfctl -f -
         pfctl -k 172.16.0.10 -> "killed 288 states from 1 sources and 0 destinations"
 depois: curl -> http=000 ; ping 172.16.0.1 -> 2/2 (gateway continua respondendo)

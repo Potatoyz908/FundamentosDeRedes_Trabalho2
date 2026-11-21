@@ -1,4 +1,5 @@
-Coletado na Raspberry Pi em 2026-11-14
+Coletado na Raspberry Pi em 2026-11-14 (software e MACs);
+IP da WAN atualizado em 2026-11-21 conforme uso atual (telnet 192.168.2.241 80).
 
 freebsd-version : 15.1-RELEASE
 uname -sr       : FreeBSD 15.1-RELEASE (GENERIC, arm64)
@@ -9,5 +10,5 @@ pf              : modulo do kernel (pf.ko e pflog.ko carregados)
 sshd            : OpenSSH_10.0 FreeBSD-20250801
 
 Interfaces
-ue0 (WAN) : MAC b8:27:eb:a8:99:bc  192.168.1.31/24 (DHCP, rede de casa)
+ue0 (WAN) : MAC b8:27:eb:a8:99:bc  192.168.2.241/24 (DHCP; gateway da rede de acesso 192.168.2.1)
 ue1 (LAN) : MAC 00:e0:4c:50:37:88  172.16.0.1/16  (adaptador USB-Ethernet)

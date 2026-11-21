@@ -1,5 +1,5 @@
 # Notebook - host LAN / cliente WAN
-$ ping -c2 -W2 -I enp44s0 172.16.0.1 | tail -3; ping -c3 -W2 -I enp44s0 8.8.8.8 | tail -3; curl -sI -m8 http://104.20.23.154 -H "Host: example.com" | head -1
+$ ping -c2 -W2 -I enp44s0 172.16.0.1 | tail -3; ping -c3 -W2 -I enp44s0 8.8.8.8 | tail -3; curl -sI -m8 http://104.20.23.154 -H "Host: unb.br" | head -1
 --- 172.16.0.1 ping statistics ---
 2 packets transmitted, 2 received, 0% packet loss, time 1061ms
 rtt min/avg/max/mdev = 0.424/0.439/0.454/0.015 ms

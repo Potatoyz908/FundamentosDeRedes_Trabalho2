@@ -4,13 +4,13 @@ Notação: **Pi** = roteador FreeBSD (`ue0` WAN, `ue1` LAN); **LAN** = host de t
 
 ## Preparar os hosts
 
-| Ferramenta | Linux | Windows |
-| --- | --- | --- |
-| Endereço e rota | `ip -4 addr` / `ip route` | `ipconfig /all` / `route print` |
-| Renovar DHCP | `nmcli connection down X; nmcli connection up X` | `ipconfig /release` e `ipconfig /renew` |
-| Servidor TCP | `nc -lk 8080` | `ncat -lk 8080` (Nmap) |
-| Cliente TCP | `telnet IP 80` ou `nc IP 80` | `telnet IP 80` (recurso opcional) |
-| Rastreio da rota | `traceroute -n IP` | `tracert -d IP` |
+| Ferramenta       | Linux                                            | Windows                                 |
+| ---------------- | ------------------------------------------------ | --------------------------------------- |
+| Endereço e rota  | `ip -4 addr` / `ip route`                        | `ipconfig /all` / `route print`         |
+| Renovar DHCP     | `nmcli connection down X; nmcli connection up X` | `ipconfig /release` e `ipconfig /renew` |
+| Servidor TCP     | `nc -lk 8080`                                    | `ncat -lk 8080` (Nmap)                  |
+| Cliente TCP      | `telnet IP 80` ou `nc IP 80`                     | `telnet IP 80` (recurso opcional)       |
+| Rastreio da rota | `traceroute -n IP`                               | `tracert -d IP`                         |
 
 O host precisa liberar a porta 8080 no firewall local e ter a Pi (172.16.0.1) como gateway.
 
@@ -32,15 +32,15 @@ No host LAN:
 ```sh
 ip -4 addr show ; ip route show default
 ping -c3 172.16.0.1
-curl -sI http://example.com | head -1     # ou curl -I https://www.freebsd.org
-traceroute -n 8.8.8.8                     # não usar -I: o ICMP é bloqueado de propósito
+curl -sI http://unb.br| head -1
+traceroute -n 8.8.8.8
 ```
 
 Esperado: 172.16.10.111/16, default via 172.16.0.1, ping respondido, `HTTP/1.1 200 OK`, primeiro salto 172.16.0.1. **Prova:** a LAN alcança o gateway e, através dele, a rede externa. Imagem: `04_teste1_conectividade.png`.
 
 ## 2. Tradução de endereço (NAT)
 
-Na Pi, em dois terminais: `tcpdump -ni ue1 tcp port 80` e `tcpdump -ni ue0 tcp port 80`. No host LAN: `curl -sI http://example.com`. Depois, na Pi: `pfctl -ss | grep :80`.
+Na Pi, em dois terminais: `tcpdump -ni ue1 tcp port 80` e `tcpdump -ni ue0 tcp port 80`. No host LAN: `curl -sI http://unb.br`. Depois, na Pi: `pfctl -ss | grep :80`.
 
 Esperado: em `ue1` a origem é 172.16.10.111; em `ue0` a mesma conexão (mesmo `seq`) sai com o IP da WAN e outra porta; o estado mostra `IP_WAN:porta (172.16.10.111:porta) -> destino`. **Prova:** a origem privada é traduzida. Imagem: `05_teste2_nat.png`.
 
@@ -73,7 +73,7 @@ Esperado: o texto digitado em um lado aparece no outro e o estado mostra `172.16
 ## 6. Bloqueio de ping para fora da LAN
 
 1. Pi: `tcpdump -n -e -ttt -i pflog0` (se faltar: `service pflog onestart`).
-2. LAN: `ping -c3 172.16.0.1` (responde); `ping -c3 8.8.8.8` (100% de perda); `curl -sI http://example.com` (continua funcionando).
+2. LAN: `ping -c3 172.16.0.1` (responde); `ping -c3 8.8.8.8` (100% de perda); `curl -sI http://unb.br` (continua funcionando).
 3. Pi: `pfctl -vs rules | grep -A1 "icmp-type echoreq"` (contador da regra).
 
 Esperado: no `pflog0` aparece `block in on ue1: 172.16.10.111 > 8.8.8.8: ICMP echo request`. **Prova:** só o ICMP echo para fora da LAN é barrado; o gateway e os demais protocolos funcionam. Imagem: `07_teste6_bloqueio_ping.png`.
@@ -90,17 +90,17 @@ Esperado: com o serviço parado nada escuta na porta 67; ao iniciar volta `udp4 
 
 ## Checklist
 
-| # | Requisito | Teste | Resultado (14/11/2026) |
-| --- | --- | --- | --- |
-| 1 | WAN com IP da rede de acesso, LAN /16 privada | 0 | OK |
-| 2 | Conectividade | 1 | OK |
-| 3 | NAT | 2 | OK |
-| 4 | Isolamento | 3 | OK |
-| 5 | DHCP, DNS e IP fixo | 4 | OK |
-| 6 | Leases em log | 4 | OK |
-| 7 | DNAT 80 para 8080 com netcat/telnet | 5 | OK |
-| 8 | Bloqueio de ping para fora | 6 | OK |
-| 9 | Arquivos sem erro de interpretação | 0 | OK |
+| #   | Requisito                                     | Teste | Resultado (14/11/2026) |
+| --- | --------------------------------------------- | ----- | ---------------------- |
+| 1   | WAN com IP da rede de acesso, LAN /16 privada | 0     | OK                     |
+| 2   | Conectividade                                 | 1     | OK                     |
+| 3   | NAT                                           | 2     | OK                     |
+| 4   | Isolamento                                    | 3     | OK                     |
+| 5   | DHCP, DNS e IP fixo                           | 4     | OK                     |
+| 6   | Leases em log                                 | 4     | OK                     |
+| 7   | DNAT 80 para 8080 com netcat/telnet           | 5     | OK                     |
+| 8   | Bloqueio de ping para fora                    | 6     | OK                     |
+| 9   | Arquivos sem erro de interpretação            | 0     | OK                     |
 
 ## Apêndice: simular o lado WAN com um único notebook
 

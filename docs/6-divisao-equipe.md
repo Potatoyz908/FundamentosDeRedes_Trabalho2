@@ -2,12 +2,12 @@
 
 Cada pessoa é **dona** de uma parte: sabe explicar a configuração, executar os comandos de cor e responder as perguntas dela. Se o professor pedir algo de qualquer parte, quem for o dono assume o teclado. A divisão abaixo é uma sugestão e pode ser trocada entre vocês; o importante é que cada área tenha um dono e um reserva.
 
-| Área | Dono | Reserva | Demonstrações |
-| --- | --- | --- | --- |
-| 1. Roteador e rede base | Euller | Pedro | Montagem, D1, serviços (stop/start), laboratório |
-| 2. DHCP e leases | Davi | Giovani | D2 |
-| 3. NAT, firewall e isolamento | Giovani | Davi | D3 conectividade, D4 NAT, D5 isolamento |
-| 4. DNAT e bloqueio de ping | Pedro | Euller | D6 DNAT, D7 ping |
+| Área                          | Dono    | Reserva | Demonstrações                                    |
+| ----------------------------- | ------- | ------- | ------------------------------------------------ |
+| 1. Roteador e rede base       | Euller  | Pedro   | Montagem, D1, serviços (stop/start), laboratório |
+| 2. DHCP e leases              | Davi    | Giovani | D2                                               |
+| 3. NAT, firewall e isolamento | Giovani | Davi    | D3 conectividade, D4 NAT, D5 isolamento          |
+| 4. DNAT e bloqueio de ping    | Pedro   | Euller  | D6 DNAT, D7 ping                                 |
 
 No dia, quem estiver na Pi (dois terminais SSH) e quem estiver no host de testes se alternam conforme a demonstração. Os comandos completos estão em [3-validacao.md](3-validacao.md).
 
@@ -26,6 +26,7 @@ No dia, quem estiver na Pi (dois terminais SSH) e quem estiver no host de testes
 **Arquivo:** `configs/rc.conf`.
 
 **Precisa saber explicar**
+
 - Por que `gateway_enable="YES"`: liga o repasse (`net.inet.ip.forwarding=1`); sem ele a Pi não encaminha entre `ue0` e `ue1`.
 - `ifconfig_ue0="DHCP"` (WAN) e `ifconfig_ue1="inet 172.16.0.1 netmask 255.255.0.0"` (LAN); por que 172.16.0.0/16 (bloco privado RFC 1918, /16 como o enunciado pede).
 - Como os serviços sobem no boot (`pf_enable`, `pflog_enable`, `dnsmasq_enable`, `sshd_enable`).
@@ -34,6 +35,7 @@ No dia, quem estiver na Pi (dois terminais SSH) e quem estiver no host de testes
 - O que fazer se `ue0` e `ue1` estiverem invertidas (trocar as macros nos três arquivos).
 
 **Comandos de cor**
+
 ```sh
 ifconfig ue0 ; ifconfig ue1
 sysctl net.inet.ip.forwarding
@@ -42,6 +44,7 @@ service pf status ; service pflog status ; service dnsmasq status ; service sshd
 ```
 
 **Se o professor pedir**
+
 - "Mostre que é um roteador": os comandos acima (duas interfaces, forwarding 1, rota default pela WAN).
 - "Pare e inicie o serviço": `service dnsmasq stop`, `sockstat -4l | grep :67` (nada), `service dnsmasq start` (volta `udp4 *:67`).
 - "Mude o IP da WAN para fixo": editar `rc.conf` (linhas alternativas), validar com `sh -n`, reiniciar.
@@ -50,9 +53,10 @@ service pf status ; service pflog status ; service dnsmasq status ; service sshd
 - "Reinicie e prove que sobe sozinho": `shutdown -r now`, depois os `service ... status` e `pfctl -sn`.
 
 **Perguntas prováveis**
-- *Diferença entre repasse e roteamento?* Repasse move cada pacote de uma interface para outra (plano de dados); roteamento decide as rotas (plano de controle).
-- *Como a Pi sabe a rota para a internet?* A rota default aponta para o gateway da rede de acesso, obtida por DHCP na `ue0`.
-- *O que acontece com `forwarding=0`?* O host da LAN alcança só a Pi, não a rede externa.
+
+- _Diferença entre repasse e roteamento?_ Repasse move cada pacote de uma interface para outra (plano de dados); roteamento decide as rotas (plano de controle).
+- _Como a Pi sabe a rota para a internet?_ A rota default aponta para o gateway da rede de acesso, obtida por DHCP na `ue0`.
+- _O que acontece com `forwarding=0`?_ O host da LAN alcança só a Pi, não a rede externa.
 
 ---
 
@@ -61,6 +65,7 @@ service pf status ; service pflog status ; service dnsmasq status ; service sshd
 **Arquivo:** `configs/dnsmasq.conf`.
 
 **Precisa saber explicar**
+
 - O DORA (Discover, Offer, Request, Ack), UDP 68 para 67, começa por broadcast (veja `docs/img/dhcp-dora.svg`).
 - `port=0`: desliga o DNS do dnsmasq; só DHCP. O DNS é entregue ao cliente por opção (164.41.101.4 e .11).
 - `interface=ue1` e `bind-interfaces`: só atende a LAN. `dhcp-authoritative`: único servidor da rede.
@@ -70,14 +75,17 @@ service pf status ; service pflog status ; service dnsmasq status ; service sshd
 - Trocar o host de testes: ler o MAC no log, editar `dhcp-host=`, `service dnsmasq restart`. Vários MACs na mesma linha servem, com só um host ligado por vez.
 
 **Comandos de cor**
+
 ```sh
 cat /var/db/dnsmasq.leases
 grep -E "DHCP(DISCOVER|OFFER|REQUEST|ACK)" /var/log/dnsmasq.log | tail
 dnsmasq --test -C /usr/local/etc/dnsmasq.conf
 ```
+
 No host: renovar o DHCP e mostrar `ip -4 addr`, `ip route show default`, `resolvectl dns` (ou `ipconfig /renew` e `ipconfig /all` no Windows).
 
 **Se o professor pedir**
+
 - "Use outra máquina como host": plugar, `grep DHCP /var/log/dnsmasq.log | tail`, copiar o MAC, ajustar a linha e reiniciar o serviço; renovar no host e mostrar `172.16.10.111`.
 - "Mostre as leases": os dois comandos acima.
 - "Mude o DNS para 192.168.X.1": editar `dhcp-option=option:dns-server`, validar, reiniciar o serviço, renovar no host.
@@ -85,9 +93,10 @@ No host: renovar o DHCP e mostrar `ip -4 addr`, `ip route show default`, `resolv
 - "Mude a faixa do DHCP": editar `dhcp-range`, `dnsmasq --test`, `service dnsmasq restart`, renovar no host.
 
 **Perguntas prováveis**
-- *Por que o primeiro pacote é broadcast?* O cliente ainda não tem IP nem conhece o servidor.
-- *O que é a lease?* O tempo em que o cliente pode usar o IP; renova antes de acabar (REQUEST/ACK).
-- *Os DNS entregues funcionam em casa?* Não: 164.41.101.x só respondem dentro da UnB; o DHCP os entrega do mesmo jeito.
+
+- _Por que o primeiro pacote é broadcast?_ O cliente ainda não tem IP nem conhece o servidor.
+- _O que é a lease?_ O tempo em que o cliente pode usar o IP; renova antes de acabar (REQUEST/ACK).
+- _Os DNS entregues funcionam em casa?_ Não: 164.41.101.x só respondem dentro da UnB; o DHCP os entrega do mesmo jeito.
 
 ---
 
@@ -96,6 +105,7 @@ No host: renovar o DHCP e mostrar `ip -4 addr`, `ip route show default`, `resolv
 **Arquivo:** `configs/pf.conf` (macros, `nat`, `block in on ue0 all` e exceções).
 
 **Precisa saber explicar**
+
 - `nat on ue0 inet from 172.16.0.0/16 to any -> (ue0)`: troca a origem privada pelo IP da WAN; os parênteses fazem o `pf` reler o IP da interface se o DHCP mudar.
 - A tabela de estados: guarda a tradução e desfaz na resposta (`pfctl -ss`).
 - `block in on ue0 all` e as exceções (SSH, ping ao roteador, DHCP, tráfego marcado pelo DNAT): por que a WAN não entra na LAN.
@@ -104,6 +114,7 @@ No host: renovar o DHCP e mostrar `ip -4 addr`, `ip route show default`, `resolv
 - Ordem: tradução antes do filtro; no filtro vale a última regra que casa, exceto `quick`.
 
 **Comandos de cor**
+
 ```sh
 pfctl -sn ; pfctl -sr
 tcpdump -ni ue1 tcp port 80       # LAN: origem 172.16.10.111
@@ -111,9 +122,11 @@ tcpdump -ni ue0 tcp port 80       # WAN: origem = IP da WAN
 pfctl -ss | grep :80
 pfctl -vs rules | grep -A1 "block drop in on ue0 all"   # contador
 ```
-No host: `ping -c3 172.16.0.1`, `curl -sI http://example.com`, `traceroute -n 8.8.8.8`.
+
+No host: `ping -c3 172.16.0.1`, `curl -sI http://unb.br`, `traceroute -n 8.8.8.8`.
 
 **Se o professor pedir**
+
 - "Mostre o NAT": `tcpdump` nas duas interfaces + `curl` no host + `pfctl -ss` (mesma conexão, origem diferente).
 - "Prove o isolamento": da WAN, `sudo ip route add 172.16.0.0/16 via IP_WAN_DA_PI`, ping e `nc -vz -w3 172.16.10.111 8080` falham e o contador sobe; depois `sudo ip route del 172.16.0.0/16`.
 - "Recarregue as regras": `pfctl -nf /etc/pf.conf && pfctl -f /etc/pf.conf`.
@@ -122,9 +135,10 @@ No host: `ping -c3 172.16.0.1`, `curl -sI http://example.com`, `traceroute -n 8.
 - "Por que a conexão continuou depois do bloqueio?": estado aberto; derrubar com `pfctl -k` ou `pfctl -F states`.
 
 **Perguntas prováveis**
-- *Por que `scrub in all`?* Reassembla pacotes fragmentados na entrada antes de filtrar/traduzir.
-- *Por que a WAN responde ao SSH e ao ping da Pi?* São exceções explícitas, só para o IP da Pi; o resto cai no `block`.
-- *O que é `keep state`?* A regra guarda estado; as respostas passam sem regra própria.
+
+- _Por que `scrub in all`?_ Reassembla pacotes fragmentados na entrada antes de filtrar/traduzir.
+- _Por que a WAN responde ao SSH e ao ping da Pi?_ São exceções explícitas, só para o IP da Pi; o resto cai no `block`.
+- _O que é `keep state`?_ A regra guarda estado; as respostas passam sem regra própria.
 
 ---
 
@@ -133,6 +147,7 @@ No host: `ping -c3 172.16.0.1`, `curl -sI http://example.com`, `traceroute -n 8.
 **Arquivo:** `configs/pf.conf` (`rdr`, `tag`/`tagged` e a regra do ICMP).
 
 **Precisa saber explicar**
+
 - `rdr on ue0 inet proto tcp from any to (ue0) port 80 tag DNAT_TESTE -> 172.16.10.111 port 8080`: troca o **destino** (porta 80 da WAN para a 8080 do host).
 - `pass in on ue0 ... tagged DNAT_TESTE`: só o que o `rdr` marcou entra na LAN; o filtro vê o destino já traduzido.
 - O host da LAN precisa ter a Pi como gateway para a resposta voltar (o DHCP entrega isso).
@@ -140,6 +155,7 @@ No host: `ping -c3 172.16.0.1`, `curl -sI http://example.com`, `traceroute -n 8.
 - Como ver o bloqueio: `tcpdump -n -e -ttt -i pflog0`.
 
 **Comandos de cor**
+
 ```sh
 # LAN:  nc -lk 8080
 # WAN:  telnet IP_WAN_DA_PI 80      (ou: nc IP_WAN_DA_PI 80)
@@ -147,9 +163,11 @@ pfctl -ss | grep 8080
 tcpdump -n -e -ttt -i pflog0
 pfctl -vs rules | grep -A1 "icmp-type echoreq"
 ```
+
 Para sair: `Ctrl+C` no `nc`; no telnet, `Ctrl+]` e `quit`.
 
 **Se o professor pedir**
+
 - "Mostre o DNAT": servidor `nc -lk 8080` na LAN, `telnet` na WAN, uma frase em cada sentido, `pfctl -ss | grep 8080` mostrando `ESTABLISHED`.
 - "Mostre o bloqueio de ping": `ping 172.16.0.1` responde, `ping 8.8.8.8` perde tudo, `pflog0` registra, `curl` continua funcionando.
 - "Libere o ping": comentar a regra `block ... icmp-type echoreq`, `pfctl -nf` e `pfctl -f /etc/pf.conf`; repetir o ping de um host novo (estados antigos podem manter o ping aberto). Restaurar depois.
@@ -158,10 +176,11 @@ Para sair: `Ctrl+C` no `nc`; no telnet, `Ctrl+]` e `quit`.
 - "Mude a porta ou o destino do DNAT": `porta_servico` e `host_alvo` no `pf.conf`, `pfctl -nf`, `pfctl -f`, e o `nc -lk` na porta nova.
 
 **Perguntas prováveis**
-- *Diferença entre NAT e DNAT?* NAT troca a origem (saída); DNAT troca o destino (entrada).
-- *O que o `tag` resolve?* Impede que qualquer TCP direto da WAN para a LAN passe; só o redirecionado passa.
-- *Por que o ping bloqueado não afeta o curl?* A regra casa só ICMP echo request; TCP segue por outras regras.
-- *O host consegue pingar a Pi?* Sim: o destino 172.16.0.1 está dentro da LAN, fora do alcance da regra (`to ! rede_lan`).
+
+- _Diferença entre NAT e DNAT?_ NAT troca a origem (saída); DNAT troca o destino (entrada).
+- _O que o `tag` resolve?_ Impede que qualquer TCP direto da WAN para a LAN passe; só o redirecionado passa.
+- _Por que o ping bloqueado não afeta o curl?_ A regra casa só ICMP echo request; TCP segue por outras regras.
+- _O host consegue pingar a Pi?_ Sim: o destino 172.16.0.1 está dentro da LAN, fora do alcance da regra (`to ! rede_lan`).
 
 ---
 
@@ -169,16 +188,16 @@ Para sair: `Ctrl+C` no `nc`; no telnet, `Ctrl+]` e `quit`.
 
 O professor costuma improvisar (relato de outros grupos). O procedimento de cada item está em [4-demonstracao.md](4-demonstracao.md), na seção "Pedidos extras". Quem for o dono assume o teclado; o reserva confere os comandos.
 
-| Pedido do professor | Dono | Reserva | Seção |
-| --- | --- | --- | --- |
-| Bloquear o IP de um host da LAN ou um IP de destino | Giovani | Davi | P1 |
-| Cortar a conexão de um cliente, do NAT ou de uma conexão específica | Giovani | Pedro | P4 |
-| LAN falar com a WLAN (TCP, ping, e WLAN → LAN com regra e rota) | Pedro | Giovani | P2 |
-| Mudar o IP reservado do host (DHCP + `host_alvo`) | Davi | Euller | P3a |
-| Mudar o IP de um computador à mão ou da WAN da Pi para fixo | Euller | Davi | P3b, P3c |
-| Cortar a WAN, a LAN ou o DHCP; reiniciar o roteador | Euller | Pedro | P4 |
-| Mudar a porta ou o destino do DNAT; liberar o ping | Pedro | Euller | P5 |
-| Mudar faixa/DNS do DHCP; trocar de host de testes | Davi | Giovani | P5 |
+| Pedido do professor                                                 | Dono    | Reserva | Seção    |
+| ------------------------------------------------------------------- | ------- | ------- | -------- |
+| Bloquear o IP de um host da LAN ou um IP de destino                 | Giovani | Davi    | P1       |
+| Cortar a conexão de um cliente, do NAT ou de uma conexão específica | Giovani | Pedro   | P4       |
+| LAN falar com a WLAN (TCP, ping, e WLAN → LAN com regra e rota)     | Pedro   | Giovani | P2       |
+| Mudar o IP reservado do host (DHCP + `host_alvo`)                   | Davi    | Euller  | P3a      |
+| Mudar o IP de um computador à mão ou da WAN da Pi para fixo         | Euller  | Davi    | P3b, P3c |
+| Cortar a WAN, a LAN ou o DHCP; reiniciar o roteador                 | Euller  | Pedro   | P4       |
+| Mudar a porta ou o destino do DNAT; liberar o ping                  | Pedro   | Euller  | P5       |
+| Mudar faixa/DNS do DHCP; trocar de host de testes                   | Davi    | Giovani | P5       |
 
 Regras de ouro para todos (valem em qualquer pedido): fazer backup (`cp /etc/pf.conf /etc/pf.conf.bak`), validar antes (`pfctl -nf`), recarregar com `pfctl -f` (não reiniciar), lembrar que o `pf` mantém estados abertos (`pfctl -k IP` ou `pfctl -F states`) e restaurar no fim.
 

@@ -1,5 +1,5 @@
 # Notebook - host LAN / cliente WAN
-$ ip -4 addr show enp44s0 | grep inet; ip route show default; resolvectl dns enp44s0; ping -c3 -W2 172.16.0.1; curl -sI -m8 http://104.20.23.154 -H "Host: example.com" | head -1; traceroute -n -m3 -w2 8.8.8.8
+$ ip -4 addr show enp44s0 | grep inet; ip route show default; resolvectl dns enp44s0; ping -c3 -W2 172.16.0.1; curl -sI -m8 http://104.20.23.154 -H "Host: unb.br" | head -1; traceroute -n -m3 -w2 8.8.8.8
     inet 172.16.0.10/16 brd 172.16.255.255 scope global noprefixroute enp44s0
 default via 172.16.0.1 dev enp44s0 proto dhcp src 172.16.0.10 metric 20100
 Link 2 (enp44s0): 164.41.101.4 164.41.101.11

@@ -19,11 +19,11 @@ pass out on ue0 all
 == Teste 1 - Conectividade (host LAN)
 ip: 172.16.0.10/16 ; default via 172.16.0.1 proto dhcp
 ping 172.16.0.1: 3/3 recebidos
-curl -sI https://www.freebsd.org: HTTP/1.1 200 OK ; curl -sI http://example.com: 200 OK
+curl -sI https://www.freebsd.org: HTTP/1.1 200 OK ; curl -sI http://unb.br: 200 OK
 traceroute -n 8.8.8.8: 1) 172.16.0.1  2) 192.168.1.254  3) * * *
 dig @164.41.101.4 e @164.41.101.11: timeout (servidores so alcancaveis na rede da UnB; ver limitacoes)
 
-== Teste 2 - NAT (tcpdump na Pi durante curl http://example.com)
+== Teste 2 - NAT (tcpdump na Pi durante curl http://unb.br)
 ue1 (LAN): 172.16.0.10.48026 > 104.20.23.154.80  [S]
 ue0 (WAN): 192.168.1.31.65239 > 104.20.23.154.80 [S]   (mesmo seq 1221352595)
 pfctl -ss: tcp 192.168.1.31:65239 (172.16.0.10:48026) -> 104.20.23.154:80
